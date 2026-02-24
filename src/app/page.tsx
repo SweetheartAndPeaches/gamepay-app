@@ -101,9 +101,9 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="phone">{t('auth.phone')}</Label>
+                <Label htmlFor="phone" className="mb-2 block">{t('auth.phone')}</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -117,7 +117,7 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <Label htmlFor="password">{t('auth.password')}</Label>
+                <Label htmlFor="password" className="mb-2 block">{t('auth.password')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -132,7 +132,7 @@ export default function LoginPage() {
 
               {!isLogin && (
                 <div>
-                  <Label htmlFor="inviteCode">{t('auth.inviteCodeOptional')}</Label>
+                  <Label htmlFor="inviteCode" className="mb-2 block">{t('auth.inviteCodeOptional')}</Label>
                   <Input
                     id="inviteCode"
                     type="text"
