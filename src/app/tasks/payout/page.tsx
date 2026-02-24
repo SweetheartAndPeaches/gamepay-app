@@ -29,24 +29,24 @@ export default function PayoutTasksPage() {
   
   // 获取所有翻译用于调试
   const allTranslations = {
-    payoutTitle: t('payout.title'),
-    payoutTotalTasks: t('payout.totalTasks'),
-    payoutDescription: t('payout.description'),
-    payoutTaskRange: t('payout.taskRange'),
-    payoutProgress: t('payout.progress', { current: 1, total: 3 }),
-    payoutInProgress: t('payout.inProgress'),
-    payoutOrderNo: t('payout.orderNo'),
-    payoutOrderAmount: t('payout.orderAmount'),
-    payoutReward: t('payout.reward'),
-    payoutExpiryTime: t('payout.expiryTime'),
-    payoutClaimTask: t('payout.claimTask'),
-    payoutMarkCompleted: t('payout.markCompleted'),
-    payoutCompleted: t('payout.completed'),
-    statusPending: t('payout.status.pending'),
-    statusClaimed: t('payout.status.claimed'),
-    statusCompleted: t('payout.status.completed'),
+    payoutTitle: t('tasks.payout.title'),
+    payoutTotalTasks: t('tasks.payout.totalTasks'),
+    payoutDescription: t('tasks.payout.description'),
+    payoutTaskRange: t('tasks.payout.taskRange'),
+    payoutProgress: t('tasks.payout.progress', { current: 1, total: 3 }),
+    payoutInProgress: t('tasks.payout.inProgress'),
+    payoutOrderNo: t('tasks.payout.orderNo'),
+    payoutOrderAmount: t('tasks.payout.orderAmount'),
+    payoutReward: t('tasks.payout.reward'),
+    payoutExpiryTime: t('tasks.payout.expiryTime'),
+    payoutClaimTask: t('tasks.payout.claimTask'),
+    payoutMarkCompleted: t('tasks.payout.markCompleted'),
+    payoutCompleted: t('tasks.payout.completed'),
+    statusPending: t('tasks.payout.status.pending'),
+    statusClaimed: t('tasks.payout.status.claimed'),
+    statusCompleted: t('tasks.payout.status.completed'),
   };
-  
+
   console.log('PayoutTasksPage - Current locale:', locale);
   console.log('PayoutTasksPage - All translations:', allTranslations);
   
@@ -114,11 +114,11 @@ export default function PayoutTasksPage() {
   const getStatusBadge = (status: Task['status']) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline">{t('payout.status.pending')}</Badge>;
+        return <Badge variant="outline">{t('tasks.payout.status.pending')}</Badge>;
       case 'claimed':
-        return <Badge variant="secondary">{t('payout.status.claimed')}</Badge>;
+        return <Badge variant="secondary">{t('tasks.payout.status.claimed')}</Badge>;
       case 'completed':
-        return <Badge variant="default">{t('payout.status.completed')}</Badge>;
+        return <Badge variant="default">{t('tasks.payout.status.completed')}</Badge>;
     }
   };
 
@@ -128,26 +128,26 @@ export default function PayoutTasksPage() {
       <div className="fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-300 p-2 z-50 text-xs overflow-auto max-h-32">
         <strong>调试信息：</strong>
         <div>Locale: {locale}</div>
-        <div>Payout Title: {t('payout.title')}</div>
-        <div>Payout Total Tasks: {t('payout.totalTasks')}</div>
-        <div>Status Pending: {t('payout.status.pending')}</div>
-        <div>Task Range: {t('payout.taskRange')}</div>
+        <div>Payout Title: {t('tasks.payout.title')}</div>
+        <div>Payout Total Tasks: {t('tasks.payout.totalTasks')}</div>
+        <div>Status Pending: {t('tasks.payout.status.pending')}</div>
+        <div>Task Range: {t('tasks.payout.taskRange')}</div>
       </div>
-      
+
       <div className="p-4 space-y-4 mt-12">
-        <h1 className="text-xl font-bold text-gray-900">{t('payout.title')}</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('tasks.payout.title')}</h1>
 
         <Card className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
           <div className="flex items-center gap-3 mb-2">
             <CreditCard className="w-8 h-8" />
             <div>
-              <p className="text-sm opacity-90">{t('payout.totalTasks')}</p>
+              <p className="text-sm opacity-90">{t('tasks.payout.totalTasks')}</p>
               <p className="text-2xl font-bold">
                 {taskGroups.reduce((acc, g) => acc + g.required, 0)}
               </p>
             </div>
           </div>
-          <p className="text-xs opacity-80">{t('payout.description')}</p>
+          <p className="text-xs opacity-80">{t('tasks.payout.description')}</p>
         </Card>
 
         {taskGroups.map((group) => (
@@ -155,16 +155,16 @@ export default function PayoutTasksPage() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h2 className="font-semibold text-gray-900">
-                  {t('payout.taskRange')} {formatCurrency(group.range.split('-')[0])} - {formatCurrency(group.range.split('-')[1])}
+                  {t('tasks.payout.taskRange')} {formatCurrency(group.range.split('-')[0])} - {formatCurrency(group.range.split('-')[1])}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  {t('payout.progress', { current: group.completed, total: group.required })}
+                  {t('tasks.payout.progress', { current: group.completed, total: group.required })}
                 </p>
               </div>
               <Badge
                 variant={group.completed >= group.required ? 'default' : 'secondary'}
               >
-                {group.completed >= group.required ? t('payout.completed') : t('payout.inProgress')}
+                {group.completed >= group.required ? t('tasks.payout.completed') : t('tasks.payout.inProgress')}
               </Badge>
             </div>
 
@@ -184,7 +184,7 @@ export default function PayoutTasksPage() {
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-gray-500" />
                       <span className="text-sm text-gray-600">
-                        {t('payout.orderNo')}: {task.orderNo}
+                        {t('tasks.payout.orderNo')}: {task.orderNo}
                       </span>
                     </div>
                     {getStatusBadge(task.status)}
@@ -192,11 +192,11 @@ export default function PayoutTasksPage() {
 
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div>
-                      <p className="text-xs text-gray-600">{t('payout.orderAmount')}</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.orderAmount')}</p>
                       <p className="font-bold text-gray-900">{formatCurrency(task.amount)}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">{t('payout.reward')}</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.reward')}</p>
                       <p className="font-bold text-green-600">
                         {formatCurrency(task.reward)}
                       </p>
@@ -204,7 +204,7 @@ export default function PayoutTasksPage() {
                   </div>
 
                   <p className="text-xs text-gray-500 mb-3">
-                    {t('payout.expiryTime')}: {task.expiryTime}
+                    {t('tasks.payout.expiryTime')}: {task.expiryTime}
                   </p>
 
                   {task.status === 'pending' && (
@@ -212,7 +212,7 @@ export default function PayoutTasksPage() {
                       className="w-full"
                       onClick={() => handleClaim(group.range, task.id)}
                     >
-                      {t('payout.claimTask')}
+                      {t('tasks.payout.claimTask')}
                     </Button>
                   )}
 
@@ -222,7 +222,7 @@ export default function PayoutTasksPage() {
                       variant="secondary"
                       onClick={() => handleComplete(group.range, task.id)}
                     >
-                      {t('payout.markCompleted')}
+                      {t('tasks.payout.markCompleted')}
                     </Button>
                   )}
 

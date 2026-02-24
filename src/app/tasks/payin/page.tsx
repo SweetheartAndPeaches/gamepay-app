@@ -22,9 +22,9 @@ export default function PayinTasksPage() {
   
   console.log('PayinTasksPage - Current locale:', locale);
   console.log('PayinTasksPage - Translation test:', {
-    title: t('payin.title'),
-    totalTasks: t('payin.totalTasks'),
-    description: t('payin.description'),
+    title: t('tasks.payin.title'),
+    totalTasks: t('tasks.payin.totalTasks'),
+    description: t('tasks.payin.description'),
   });
   
   const [tasks, setTasks] = useState<Task[]>([
@@ -67,11 +67,11 @@ export default function PayinTasksPage() {
   const getStatusBadge = (status: Task['status']) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline">{t('payin.status.pending')}</Badge>;
+        return <Badge variant="outline">{t('tasks.payin.status.pending')}</Badge>;
       case 'completed':
-        return <Badge variant="default">{t('payin.status.completed')}</Badge>;
+        return <Badge variant="default">{t('tasks.payin.status.completed')}</Badge>;
       case 'expired':
-        return <Badge variant="destructive">{t('payin.status.expired')}</Badge>;
+        return <Badge variant="destructive">{t('tasks.payin.status.expired')}</Badge>;
     }
   };
 
@@ -81,24 +81,24 @@ export default function PayinTasksPage() {
       <div className="fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-300 p-2 z-50 text-xs">
         <strong>调试信息：</strong>
         <div>Locale: {locale}</div>
-        <div>Title: {t('payin.title')}</div>
-        <div>Total Tasks: {t('payin.totalTasks')}</div>
+        <div>Title: {t('tasks.payin.title')}</div>
+        <div>Total Tasks: {t('tasks.payin.totalTasks')}</div>
       </div>
-      
+
       <div className="p-4 space-y-4 mt-12">
-        <h1 className="text-xl font-bold text-gray-900">{t('payin.title')}</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t('tasks.payin.title')}</h1>
 
         <Card className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white">
           <div className="flex items-center gap-3 mb-2">
             <Wallet className="w-8 h-8" />
             <div>
-              <p className="text-sm opacity-90">{t('payin.totalTasks')}</p>
+              <p className="text-sm opacity-90">{t('tasks.payin.totalTasks')}</p>
               <p className="text-2xl font-bold">
                 {tasks.filter((t) => t.status !== 'expired').length}
               </p>
             </div>
           </div>
-          <p className="text-xs opacity-80">{t('payin.description')}</p>
+          <p className="text-xs opacity-80">{t('tasks.payin.description')}</p>
         </Card>
 
         <div className="space-y-3">
@@ -108,7 +108,7 @@ export default function PayinTasksPage() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">
-                    {t('payin.expiryTime')}: {task.expiryTime}
+                    {t('tasks.payin.expiryTime')}: {task.expiryTime}
                   </span>
                 </div>
                 {getStatusBadge(task.status)}
@@ -116,17 +116,17 @@ export default function PayinTasksPage() {
 
               <div className="grid grid-cols-2 gap-4 mb-3">
                 <div>
-                  <p className="text-xs text-gray-600">{t('payin.amount')}</p>
+                  <p className="text-xs text-gray-600">{t('tasks.payin.amount')}</p>
                   <p className="font-bold text-gray-900">{formatCurrency(task.amount)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600">{t('payin.rate')}</p>
+                  <p className="text-xs text-gray-600">{t('tasks.payin.rate')}</p>
                   <p className="font-bold text-gray-900">{(task.rate * 100).toFixed(1)}%</p>
                 </div>
               </div>
 
               <div className="mb-3">
-                <p className="text-xs text-gray-600">{t('payin.reward')}</p>
+                <p className="text-xs text-gray-600">{t('tasks.payin.reward')}</p>
                 <p className="font-bold text-green-600">{formatCurrency(task.reward)}</p>
               </div>
 
@@ -135,20 +135,20 @@ export default function PayinTasksPage() {
                   className="w-full"
                   onClick={() => handleComplete(task.id)}
                 >
-                  {t('payin.completeTask')}
+                  {t('tasks.payin.completeTask')}
                 </Button>
               )}
 
               {task.status === 'completed' && (
                 <div className="flex items-center justify-center gap-2 text-green-600">
                   <CheckCircle className="w-5 h-5" />
-                  <span className="text-sm font-medium">{t('payin.status.completed')}</span>
+                  <span className="text-sm font-medium">{t('tasks.payin.status.completed')}</span>
                 </div>
               )}
 
               {task.status === 'expired' && (
                 <div className="text-center text-sm text-gray-500">
-                  {t('payin.taskExpired')}
+                  {t('tasks.payin.taskExpired')}
                 </div>
               )}
             </Card>
@@ -156,7 +156,7 @@ export default function PayinTasksPage() {
 
           {tasks.length === 0 && (
             <Card className="p-6 text-center text-gray-500 text-sm">
-              {t('payin.noTasks')}
+              {t('tasks.payin.noTasks')}
             </Card>
           )}
         </div>

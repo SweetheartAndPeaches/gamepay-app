@@ -1,70 +1,46 @@
 import { Locale } from './config';
+import zhCN from './zh-CN.json';
+import enUS from './en-US.json';
+import jaJP from './ja-JP.json';
+import koKR from './ko-KR.json';
+import esES from './es-ES.json';
+import frFR from './fr-FR.json';
+import deDE from './de-DE.json';
 
-// 翻译缓存
-const translationsCache: Map<string, any> = new Map();
-
-// 预导入所有翻译文件
-const translationModules = {
-  'zh-CN': () => import('./zh-CN.json'),
-  'en-US': () => import('./en-US.json'),
-  'ja-JP': () => import('./ja-JP.json'),
-  'ko-KR': () => import('./ko-KR.json'),
-  'es-ES': () => import('./es-ES.json'),
-  'fr-FR': () => import('./fr-FR.json'),
-  'de-DE': () => import('./de-DE.json'),
-} as const;
-
-/**
- * 清除翻译缓存
- */
-export function clearTranslationCache(locale?: Locale) {
-  if (locale) {
-    translationsCache.delete(locale);
-    console.log(`Cleared translation cache for ${locale}`);
-  } else {
-    translationsCache.clear();
-    console.log('Cleared all translation cache');
-  }
-}
+// 翻译映射表
+const translationsMap: Record<Locale, any> = {
+  'zh-CN': zhCN,
+  'en-US': enUS,
+  'ja-JP': jaJP,
+  'ko-KR': koKR,
+  'es-ES': esES,
+  'fr-FR': frFR,
+  'de-DE': deDE,
+};
 
 /**
  * 加载翻译文件
  */
-export async function loadTranslations(locale: Locale, forceReload: boolean = false) {
-  // 如果强制重新加载，清除缓存
-  if (forceReload) {
-    clearTranslationCache(locale);
+export async function loadTranslations(locale: Locale, forceReload: boolean = false): Promise<any> {
+  console.log(`[Loader] Loading translations for locale: ${locale}, forceReload: ${forceReload}`);
+  
+  // 直接从映射表中获取翻译
+  const translations = translationsMap[locale];
+  
+  if (!translations) {
+    console.error(`[Loader] No translations found for locale: ${locale}`);
+    return {};
   }
-
-  if (translationsCache.has(locale)) {
-    console.log(`Using cached translations for ${locale}`);
-    return translationsCache.get(locale);
-  }
-
-  try {
-    const loader = translationModules[locale as keyof typeof translationModules];
-    if (!loader) {
-      throw new Error(`Unsupported locale: ${locale}`);
-    }
-
-    const messages = await loader();
-    const translations = messages.default;
-    translationsCache.set(locale, translations);
-    console.log(`Loaded and cached translations for ${locale}`);
-    return translations;
-  } catch (error) {
-    console.error(`Failed to load translations for locale: ${locale}`, error);
-    // 如果加载失败，返回英文翻译作为回退
-    try {
-      const fallback = await import('./en-US.json');
-      translationsCache.set(locale, fallback.default);
-      console.log(`Using fallback translations for ${locale}`);
-      return fallback.default;
-    } catch (fallbackError) {
-      console.error('Failed to load fallback translations', fallbackError);
-      return {};
-    }
-  }
+  
+  console.log(`[Loader] Loaded translations for ${locale}:`, {
+    keys: Object.keys(translations),
+    hasTasks: !!translations.tasks,
+    hasPayout: !!translations.tasks?.payout,
+    samplePayoutKeys: translations.tasks?.payout ? 
+      Object.keys(translations.tasks.payout).slice(0, 5) : [],
+  });
+  
+  return translations;
 }
 
 /**
@@ -72,14 +48,25 @@ export async function loadTranslations(locale: Locale, forceReload: boolean = fa
  * 例如：getNestedValue(obj, 'common.confirm') => obj.common.confirm
  */
 export function getNestedValue(obj: any, path: string): string {
+  if (!obj || typeof obj !== 'object') {
+    console.warn(`[getNestedValue] Invalid object for path: ${path}`, obj);
+    return path;
+  }
+  
   try {
-    const result = path.split('.').reduce((current, key) => current?.[key], obj);
+    const result = path.split('.').reduce((current, key) => {
+      if (!current || typeof current !== 'object') {
+        return undefined;
+      }
+      return current[key];
+    }, obj);
+    
     if (result !== undefined && result !== null) {
       return String(result);
     }
     
     // 调试日志
-    console.warn(`Translation not found for key: ${path}`, {
+    console.warn(`[getNestedValue] Translation not found for key: ${path}`, {
       path,
       objKeys: Object.keys(obj),
       pathParts: path.split('.'),
@@ -87,7 +74,7 @@ export function getNestedValue(obj: any, path: string): string {
     
     return path;
   } catch (error) {
-    console.error(`Error getting nested value for path: ${path}`, error);
+    console.error(`[getNestedValue] Error getting nested value for path: ${path}`, error);
     return path;
   }
 }
