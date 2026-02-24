@@ -427,7 +427,14 @@ export default function PayinTasksPage() {
         <Dialog open={settingsDialogOpen} onOpenChange={setSettingsDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>代收设置</DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle>代收设置</DialogTitle>
+                <Button variant="link" className="h-auto p-0" asChild>
+                  <a href="/tasks/payin/settings" target="_blank">
+                    高级设置 →
+                  </a>
+                </Button>
+              </div>
             </DialogHeader>
 
             <div className="space-y-4 py-4">

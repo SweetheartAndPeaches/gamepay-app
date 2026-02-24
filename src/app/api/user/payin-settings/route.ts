@@ -14,19 +14,25 @@ export async function GET(request: NextRequest) {
     // 验证用户身份
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
+      console.error('[PayinSettings GET] No token provided');
       return NextResponse.json(
         { success: false, message: '未授权访问' },
         { status: 401 }
       );
     }
 
+    console.log('[PayinSettings GET] Token received, length:', token.length);
+
     const payload = verifyToken(token);
     if (!payload) {
+      console.error('[PayinSettings GET] Token verification failed');
       return NextResponse.json(
         { success: false, message: 'Token 无效或已过期' },
         { status: 401 }
       );
     }
+
+    console.log('[PayinSettings GET] User ID:', payload.userId);
 
     const client = getSupabaseClient(token);
 
@@ -39,12 +45,14 @@ export async function GET(request: NextRequest) {
       .maybeSingle();
 
     if (settingsError) {
-      console.error('Get payin settings error:', settingsError);
+      console.error('[PayinSettings GET] Error fetching settings:', settingsError);
       return NextResponse.json(
-        { success: false, message: '获取代收设置失败' },
+        { success: false, message: '获取代收设置失败', error: settingsError.message },
         { status: 500 }
       );
     }
+
+    console.log('[PayinSettings GET] Settings fetched:', !!settings);
 
     return NextResponse.json({
       success: true,
@@ -57,9 +65,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Get payin settings error:', error);
+    console.error('[PayinSettings GET] Unexpected error:', error);
     return NextResponse.json(
-      { success: false, message: '服务器错误，请稍后重试' },
+      { success: false, message: '服务器错误，请稍后重试', error: (error as Error).message },
       { status: 500 }
     );
   }
@@ -70,24 +78,38 @@ export async function POST(request: NextRequest) {
     // 验证用户身份
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
     if (!token) {
+      console.error('[PayinSettings POST] No token provided');
       return NextResponse.json(
         { success: false, message: '未授权访问' },
         { status: 401 }
       );
     }
 
+    console.log('[PayinSettings POST] Token received, length:', token.length);
+
     const payload = verifyToken(token);
     if (!payload) {
+      console.error('[PayinSettings POST] Token verification failed');
       return NextResponse.json(
         { success: false, message: 'Token 无效或已过期' },
         { status: 401 }
       );
     }
 
+    console.log('[PayinSettings POST] User ID:', payload.userId);
+
     const body: UpdateSettingsRequest = await request.json();
     const { enabled, maxAmount, dailyLimit, autoAccept } = body;
 
+    console.log('[PayinSettings POST] Request body:', {
+      enabled,
+      maxAmount,
+      dailyLimit,
+      autoAccept,
+    });
+
     if (maxAmount < 0 || dailyLimit < 0) {
+      console.error('[PayinSettings POST] Invalid values:', { maxAmount, dailyLimit });
       return NextResponse.json(
         { success: false, message: '金额和次数限制不能为负数' },
         { status: 400 }
@@ -96,6 +118,7 @@ export async function POST(request: NextRequest) {
 
     const client = getSupabaseClient(token);
 
+    console.log('[PayinSettings POST] Checking existing settings...');
     const { data: existingSettings, error: existingError } = await client
       .from('user_settings')
       .select('id')
@@ -104,15 +127,18 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existingError) {
-      console.error('Check existing settings error:', existingError);
+      console.error('[PayinSettings POST] Error checking existing settings:', existingError);
       return NextResponse.json(
-        { success: false, message: '检查设置失败' },
+        { success: false, message: '检查设置失败', error: existingError.message },
         { status: 500 }
       );
     }
 
+    console.log('[PayinSettings POST] Existing settings:', !!existingSettings);
+
     if (existingSettings) {
       // 更新现有设置
+      console.log('[PayinSettings POST] Updating existing settings...');
       const { data: updatedSettings, error: updateError } = await client
         .from('user_settings')
         .update({
@@ -127,13 +153,14 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (updateError) {
-        console.error('Update settings error:', updateError);
+        console.error('[PayinSettings POST] Update error:', updateError);
         return NextResponse.json(
-          { success: false, message: '更新设置失败' },
+          { success: false, message: '更新设置失败', error: updateError.message },
           { status: 500 }
         );
       }
 
+      console.log('[PayinSettings POST] Settings updated successfully');
       return NextResponse.json({
         success: true,
         message: '更新代收设置成功',
@@ -141,6 +168,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // 创建新设置
+      console.log('[PayinSettings POST] Creating new settings...');
       const { data: newSettings, error: insertError } = await client
         .from('user_settings')
         .insert({
@@ -155,13 +183,14 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (insertError) {
-        console.error('Create settings error:', insertError);
+        console.error('[PayinSettings POST] Insert error:', insertError);
         return NextResponse.json(
-          { success: false, message: '创建设置失败' },
+          { success: false, message: '创建设置失败', error: insertError.message, details: insertError },
           { status: 500 }
         );
       }
 
+      console.log('[PayinSettings POST] Settings created successfully');
       return NextResponse.json({
         success: true,
         message: '创建代收设置成功',
@@ -169,9 +198,9 @@ export async function POST(request: NextRequest) {
       });
     }
   } catch (error) {
-    console.error('Update payin settings error:', error);
+    console.error('[PayinSettings POST] Unexpected error:', error);
     return NextResponse.json(
-      { success: false, message: '服务器错误，请稍后重试' },
+      { success: false, message: '服务器错误，请稍后重试', error: (error as Error).message },
       { status: 500 }
     );
   }
