@@ -38,9 +38,15 @@ export function I18nProvider({ children, initialLocale = defaultLocale }: I18nPr
   // 加载翻译文件
   useEffect(() => {
     setIsLoading(true);
-    loadTranslations(locale)
+    // 强制重新加载翻译，不使用缓存
+    loadTranslations(locale, true)
       .then((loadedTranslations) => {
-        console.log(`Loaded translations for ${locale}:`, loadedTranslations);
+        console.log(`[Effect] Loaded translations for ${locale}:`, {
+          keys: Object.keys(loadedTranslations),
+          hasTasks: !!loadedTranslations.tasks,
+          hasPayout: !!loadedTranslations.tasks?.payout,
+          samplePayoutKeys: loadedTranslations.tasks?.payout ? Object.keys(loadedTranslations.tasks.payout).slice(0, 5) : [],
+        });
         setTranslations(loadedTranslations);
         setIsLoading(false);
       })
@@ -52,6 +58,7 @@ export function I18nProvider({ children, initialLocale = defaultLocale }: I18nPr
 
   // 设置语言
   const setLocale = useCallback((newLocale: Locale) => {
+    console.log(`Setting locale to ${newLocale}`);
     setLocaleState(newLocale);
     localStorage.setItem('locale', newLocale);
     document.documentElement.lang = newLocale;
