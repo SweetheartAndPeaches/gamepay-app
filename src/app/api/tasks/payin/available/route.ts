@@ -86,12 +86,11 @@ export async function GET(request: NextRequest) {
 
     const userBalance = parseFloat(user.balance.toString());
 
-    // 检查用户是否有未完成的代收任务
+    // 检查用户是否有未完成的代收任务（从 payin_task_allocations 表）
     const { data: activeTask, error: activeTaskError } = await client
-      .from('orders')
+      .from('payin_task_allocations')
       .select('*')
       .eq('user_id', payload.userId)
-      .eq('type', 'payin')
       .eq('status', 'claimed')
       .maybeSingle();
 
@@ -117,11 +116,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 获取可接收的代收任务列表（金额不超过用户余额）
+    // 获取分配给该用户的代收任务列表（从 payin_task_allocations 表）
+    // 金额不超过用户余额
     const { data: tasks, error: tasksError } = await client
-      .from('orders')
+      .from('payin_task_allocations')
       .select('*')
-      .eq('type', 'payin')
+      .eq('user_id', payload.userId)
       .eq('status', 'pending')
       .lte('amount', userBalance)
       .gt('expires_at', new Date().toISOString())

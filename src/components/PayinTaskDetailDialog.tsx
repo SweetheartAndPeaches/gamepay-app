@@ -11,10 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useI18n } from '@/i18n/context';
-import { CheckCircle, AlertCircle, DollarSign, Clock, Wallet } from 'lucide-react';
+import { CheckCircle, AlertCircle, DollarSign, Clock, Wallet, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Order {
@@ -23,6 +24,9 @@ interface Order {
   amount: number;
   commission: number;
   status: 'pending' | 'claimed' | 'completed' | 'expired' | 'cancelled';
+  payment_method: string | null;
+  payment_account_info: any;
+  transfer_proof_url: string | null;
   expires_at: string;
 }
 
@@ -38,9 +42,11 @@ interface PayinTaskDetailDialogProps {
   order: Order | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onClaim: (orderId: string, accountId: string) => void;
-  onConfirm: (orderId: string) => void;
+  onClaim: (taskId: string, accountId: string) => void;
+  onUploadProof: (taskId: string, proofUrl: string) => void;
+  onConfirm: (taskId: string) => void;
   isClaiming: boolean;
+  isUploading: boolean;
   isConfirming: boolean;
   userBalance: number;
   accounts: Account[];
@@ -52,8 +58,10 @@ export default function PayinTaskDetailDialog({
   open,
   onOpenChange,
   onClaim,
+  onUploadProof,
   onConfirm,
   isClaiming,
+  isUploading,
   isConfirming,
   userBalance,
   accounts,
@@ -61,6 +69,8 @@ export default function PayinTaskDetailDialog({
 }: PayinTaskDetailDialogProps) {
   const { t, formatCurrency } = useI18n();
   const [selectedAccountId, setSelectedAccountId] = useState('');
+  const [transferProofUrl, setTransferProofUrl] = useState('');
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   if (!order) return null;
 
@@ -70,6 +80,22 @@ export default function PayinTaskDetailDialog({
       return;
     }
     onClaim(order.id, selectedAccountId);
+  };
+
+  const handleUploadProof = () => {
+    if (!transferProofUrl) {
+      toast.error('请输入转账凭证 URL');
+      return;
+    }
+    onUploadProof(order.id, transferProofUrl);
+    setTransferProofUrl('');
+  };
+
+  const handleCopy = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    toast.success('已复制到剪贴板');
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const getStatusBadge = () => {
@@ -105,6 +131,8 @@ export default function PayinTaskDetailDialog({
     };
     return methodMap[type] || type;
   };
+
+  const paymentInfo = order.payment_account_info ? JSON.parse(order.payment_account_info) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,6 +185,77 @@ export default function PayinTaskDetailDialog({
             <span>过期时间：{new Date(order.expires_at).toLocaleString('zh-CN')}</span>
           </div>
 
+          {/* 付款方信息 */}
+          {order.status === 'claimed' && paymentInfo && (
+            <div className="border rounded-lg p-4 space-y-3">
+              <h3 className="font-semibold text-sm text-gray-700">付款方信息</h3>
+
+              <div>
+                <Label className="text-xs text-gray-600">支付方式</Label>
+                <p className="font-medium">{formatPaymentMethod(order.payment_method || '')}</p>
+              </div>
+
+              {paymentInfo.name && (
+                <div className="space-y-1">
+                  <Label className="text-xs text-gray-600">付款人</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={paymentInfo.name}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleCopy(paymentInfo.name, 'name')}
+                    >
+                      {copiedField === 'name' ? (
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {paymentInfo.account && (
+                <div className="space-y-1">
+                  <Label className="text-xs text-gray-600">付款账号</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={paymentInfo.account}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleCopy(paymentInfo.account, 'account')}
+                    >
+                      {copiedField === 'account' ? (
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {paymentInfo.bank && (
+                <div>
+                  <Label className="text-xs text-gray-600">开户银行</Label>
+                  <p className="font-medium">{paymentInfo.bank}</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 选择代收账户 */}
           {order.status === 'pending' && enabled && (
             <div className="space-y-2">
@@ -190,8 +289,39 @@ export default function PayinTaskDetailDialog({
             </div>
           )}
 
+          {/* 上传转账凭证 */}
+          {order.status === 'claimed' && !order.transfer_proof_url && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">上传转账凭证</Label>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="请输入转账凭证图片 URL"
+                  value={transferProofUrl}
+                  onChange={(e) => setTransferProofUrl(e.target.value)}
+                />
+                <Button size="icon" variant="outline">
+                  <Upload className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                请上传您收到款项的转账凭证截图
+              </p>
+            </div>
+          )}
+
+          {/* 已上传凭证提示 */}
+          {order.status === 'claimed' && order.transfer_proof_url && (
+            <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              <div className="text-sm text-green-800">
+                <p className="font-medium">已上传转账凭证</p>
+                <p className="text-xs">可以点击"已收到款项"按钮完成任务</p>
+              </div>
+            </div>
+          )}
+
           {/* 提示信息 */}
-          {order.status === 'pending' && enabled && (
+          {order.status === 'pending' && enabled && accounts.length > 0 && (
             <div className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg">
               <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-yellow-800">
@@ -214,7 +344,7 @@ export default function PayinTaskDetailDialog({
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>已冻结 {formatCurrency(order.amount)} 余额</li>
                   <li>请及时完成代收任务</li>
-                  <li>代收完成后确认收到款项即可完成任务</li>
+                  <li>上传转账凭证后点击"已收到款项"完成任务</li>
                 </ul>
               </div>
             </div>
@@ -245,12 +375,17 @@ export default function PayinTaskDetailDialog({
               去添加账户
             </Button>
           )}
-          {order.status === 'claimed' && (
+          {order.status === 'claimed' && !order.transfer_proof_url && (
+            <Button onClick={handleUploadProof} disabled={isUploading}>
+              {isUploading ? '上传中...' : '上传凭证'}
+            </Button>
+          )}
+          {order.status === 'claimed' && order.transfer_proof_url && (
             <Button
               onClick={() => onConfirm(order.id)}
               disabled={isConfirming}
             >
-              {isConfirming ? '提交中...' : '确认已收到款项'}
+              {isConfirming ? '提交中...' : '已收到款项'}
             </Button>
           )}
         </DialogFooter>

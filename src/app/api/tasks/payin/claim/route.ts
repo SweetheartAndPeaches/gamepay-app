@@ -3,7 +3,7 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyToken } from '@/lib/jwt';
 
 interface ClaimRequest {
-  orderId: string;
+  taskId: string;
   accountId: string;
 }
 
@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body: ClaimRequest = await request.json();
-    const { orderId, accountId } = body;
+    const { taskId, accountId } = body;
 
-    if (!orderId) {
+    if (!taskId) {
       return NextResponse.json(
-        { success: false, message: '订单 ID 不能为空' },
+        { success: false, message: '任务 ID 不能为空' },
         { status: 400 }
       );
     }
@@ -61,10 +61,9 @@ export async function POST(request: NextRequest) {
 
     // 检查用户是否已有未完成的任务
     const { data: activeTask, error: activeTaskError } = await client
-      .from('orders')
+      .from('payin_task_allocations')
       .select('*')
       .eq('user_id', payload.userId)
-      .eq('type', 'payin')
       .eq('status', 'claimed')
       .maybeSingle();
 
@@ -83,16 +82,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查订单是否可领取
-    const { data: order, error: orderError } = await client
-      .from('orders')
+    // 检查任务是否可领取
+    const { data: task, error: taskError } = await client
+      .from('payin_task_allocations')
       .select('*')
-      .eq('id', orderId)
-      .eq('type', 'payin')
+      .eq('id', taskId)
+      .eq('user_id', payload.userId)
       .eq('status', 'pending')
       .single();
 
-    if (orderError || !order) {
+    if (taskError || !task) {
       return NextResponse.json(
         { success: false, message: '任务不存在或已被领取' },
         { status: 404 }
@@ -100,7 +99,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查任务是否已过期
-    if (new Date(order.expires_at) < new Date()) {
+    if (new Date(task.expires_at) < new Date()) {
       return NextResponse.json(
         { success: false, message: '任务已过期' },
         { status: 400 }
@@ -124,9 +123,9 @@ export async function POST(request: NextRequest) {
 
     const userBalance = parseFloat(user.balance.toString());
     const frozenBalance = parseFloat((user as any).frozen_balance?.toString() || '0');
-    if (userBalance < order.amount) {
+    if (userBalance < task.amount) {
       return NextResponse.json(
-        { success: false, message: `余额不足，需要 ${order.amount} 元` },
+        { success: false, message: `余额不足，需要 ${task.amount} 元` },
         { status: 400 }
       );
     }
@@ -148,8 +147,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 扣减用户余额（冻结）
-    const newBalance = userBalance - order.amount;
-    const newFrozenBalance = frozenBalance + order.amount;
+    const newBalance = userBalance - task.amount;
+    const newFrozenBalance = frozenBalance + task.amount;
 
     const { error: updateBalanceError } = await client
       .from('users')
@@ -172,23 +171,21 @@ export async function POST(request: NextRequest) {
     await client.from('balance_records').insert({
       user_id: payload.userId,
       type: 'freeze',
-      amount: order.amount,
+      amount: task.amount,
       balance_after: newBalance,
-      description: `代收任务冻结（订单号：${order.order_no}）`,
-      related_order_id: order.id,
+      description: `代收任务冻结（订单号：${task.order_no}）`,
+      related_order_id: task.id,
     });
 
     // 领取任务
-    const { data: updatedOrder, error: updateError } = await client
-      .from('orders')
+    const { data: updatedTask, error: updateError } = await client
+      .from('payin_task_allocations')
       .update({
-        user_id: payload.userId,
         status: 'claimed',
-        payment_account: accountId,
-        payment_method: account.type,
+        claimed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', orderId)
+      .eq('id', taskId)
       .select()
       .single();
 
@@ -204,9 +201,9 @@ export async function POST(request: NextRequest) {
       success: true,
       message: '领取任务成功，已冻结余额',
       data: {
-        order: updatedOrder,
+        task: updatedTask,
         newBalance,
-        frozenAmount: order.amount,
+        frozenAmount: task.amount,
       },
     });
   } catch (error) {

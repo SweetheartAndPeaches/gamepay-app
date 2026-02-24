@@ -17,6 +17,9 @@ interface Order {
   amount: number;
   commission: number;
   status: 'pending' | 'claimed' | 'completed' | 'expired' | 'cancelled';
+  payment_method: string | null;
+  payment_account_info: any;
+  transfer_proof_url: string | null;
   expires_at: string;
   created_at: string;
 }
@@ -45,6 +48,7 @@ export default function PayinTasksPage() {
   const [activeTask, setActiveTask] = useState<Order | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userBalance, setUserBalance] = useState(0);
@@ -104,7 +108,7 @@ export default function PayinTasksPage() {
       const token = getToken();
       if (!token) return;
 
-      const response = await fetch('/api/tasks/payout/claimed', {
+      const response = await fetch('/api/tasks/payin/claimed', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -190,6 +194,38 @@ export default function PayinTasksPage() {
       toast.error('确认失败');
     } finally {
       setIsConfirming(false);
+    }
+  };
+
+  // 上传转账凭证
+  const handleUploadProof = async (taskId: string, proofUrl: string) => {
+    try {
+      setIsUploading(true);
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch('/api/tasks/payin/upload-proof', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ taskId, proofUrl }),
+      });
+
+      const data: ApiResponse = await response.json();
+
+      if (data.success) {
+        toast.success('上传凭证成功');
+        await fetchAvailableTasks();
+      } else {
+        toast.error(data.message || '上传凭证失败');
+      }
+    } catch (error) {
+      console.error('Upload proof error:', error);
+      toast.error('上传凭证失败');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -415,8 +451,10 @@ export default function PayinTasksPage() {
           open={!!selectedOrder}
           onOpenChange={(open) => !open && setSelectedOrder(null)}
           onClaim={handleClaim}
+          onUploadProof={handleUploadProof}
           onConfirm={handleConfirm}
           isClaiming={isClaiming}
+          isUploading={isUploading}
           isConfirming={isConfirming}
           userBalance={userBalance}
           accounts={accounts}
