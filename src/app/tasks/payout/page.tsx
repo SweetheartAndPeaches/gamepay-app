@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n/context';
-import { CreditCard, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Wallet, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -304,7 +304,7 @@ export default function PayoutTasksPage() {
         {/* 任务统计 */}
         <Card className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
           <div className="flex items-center gap-3 mb-2">
-            <CreditCard className="w-8 h-8" />
+            <Wallet className="w-8 h-8" />
             <div>
               <p className="text-sm opacity-90">您的可用余额</p>
               <p className="text-2xl font-bold">
