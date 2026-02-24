@@ -36,11 +36,16 @@
 - ✅ 代收任务页面 (`/tasks/payin`)
 - ✅ 用户页面 - 我的 (`/profile`)
 - ✅ 代理页面 (`/agent`)
+- ✅ 收付款账户管理页面 (`/profile/accounts`)
 
 ### 4. API 接口
 - ✅ POST `/api/auth/register` - 用户注册
 - ✅ POST `/api/auth/login` - 用户登录
 - ✅ GET `/api/user/info` - 获取用户信息
+- ✅ GET `/api/profile/accounts` - 获取账户列表
+- ✅ POST `/api/profile/accounts` - 添加账户
+- ✅ PUT `/api/profile/accounts/:id` - 编辑账户
+- ✅ DELETE `/api/profile/accounts/:id` - 删除账户
 
 ## 数据库表结构
 
@@ -67,11 +72,11 @@
 - [ ] POST `/api/tasks/payin/claim` - 领取代收任务
 - [ ] POST `/api/tasks/payin/confirm` - 确认收款
 
-### 2. 账户管理 API
-- [ ] GET `/api/profile/accounts` - 获取账户列表
-- [ ] POST `/api/profile/accounts` - 添加账户
-- [ ] DELETE `/api/profile/accounts/:id` - 删除账户
-- [ ] PUT `/api/profile/accounts/:id` - 编辑账户
+### 2. 账户管理 API ✅
+- [x] GET `/api/profile/accounts` - 获取账户列表
+- [x] POST `/api/profile/accounts` - 添加账户
+- [x] DELETE `/api/profile/accounts/:id` - 删除账户
+- [x] PUT `/api/profile/accounts/:id` - 编辑账户
 
 ### 3. 安全设置 API
 - [ ] POST `/api/profile/change-password` - 修改密码
@@ -90,6 +95,7 @@
 - [ ] POST `/api/agent/share` - 生成推广链接
 
 ### 6. 支付功能集成
+- [x] 二维码上传（收付款码）
 - [ ] 二维码生成（收款码）
 - [ ] 二维码识别（扫码功能）
 - [ ] 微信支付集成
