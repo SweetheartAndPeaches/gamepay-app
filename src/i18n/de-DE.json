@@ -23,6 +23,17 @@
     "warning": "Warnung",
     "info": "Information"
   },
+  "share": {
+    "title": "Teilen",
+    "description": "QR-Code scannen oder Link kopieren, um Freunde einzuladen",
+    "copyHint": "Klicken Sie auf die Schaltfläche Kopieren, um den Link zu kopieren",
+    "share": "Teilen",
+    "downloadQR": "QR-Code herunterladen",
+    "defaultTitle": "Task Wallet",
+    "defaultDescription": "Treten Sie Task Wallet bei und verdienen Sie Belohnungen durch Aufgaben",
+    "copied": "Kopiert",
+    "linkCopied": "Link in die Zwischenablage kopiert"
+  },
   "auth": {
     "login": "Anmelden",
     "register": "Registrieren",
@@ -133,7 +144,12 @@
     "balanceDescription": "Guthaben-Historie anzeigen",
     "securityDescription": "Passwort ändern, Google-Verifizierung",
     "instructionsDescription": "Aufgabenregeln und Gebühren anzeigen",
-    "settingsDescription": "App-Einstellungen"
+    "settingsDescription": "App-Einstellungen",
+    "inviteFriends": "Freunde einladen",
+    "inviteFriendsDescription": "Laden Sie Freunde ein und verdienen Sie gemeinsam Belohnungen",
+    "yourInviteCode": "Ihr Einladungscode",
+    "shareInvite": "Einladung teilen",
+    "inviteShareDescription": "QR-Code scannen oder Link kopieren, um Freunde einzuladen"
   },
   "accounts": {
     "title": "Kontoverwaltung",

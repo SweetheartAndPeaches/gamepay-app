@@ -23,6 +23,17 @@
     "warning": "Advertencia",
     "info": "Información"
   },
+  "share": {
+    "title": "Compartir",
+    "description": "Escanea el código QR o copia el enlace para invitar amigos",
+    "copyHint": "Haz clic en el botón de copiar para copiar el enlace",
+    "share": "Compartir",
+    "downloadQR": "Descargar código QR",
+    "defaultTitle": "Task Wallet",
+    "defaultDescription": "Únete a Task Wallet y gana recompensas completando tareas",
+    "copied": "Copiado",
+    "linkCopied": "Enlace copiado al portapapeles"
+  },
   "auth": {
     "login": "Iniciar sesión",
     "register": "Registrarse",
@@ -133,7 +144,12 @@
     "balanceDescription": "Ver historial de saldo",
     "securityDescription": "Cambiar contraseña, verificación Google",
     "instructionsDescription": "Ver reglas y tarifas de tareas",
-    "settingsDescription": "Configuración de la aplicación"
+    "settingsDescription": "Configuración de la aplicación",
+    "inviteFriends": "Invitar amigos",
+    "inviteFriendsDescription": "Invita amigos y gana recompensas juntos",
+    "yourInviteCode": "Tu código de invitación",
+    "shareInvite": "Compartir invitación",
+    "inviteShareDescription": "Escanea el código QR o copia el enlace para invitar amigos"
   },
   "accounts": {
     "title": "Gestión de cuentas",

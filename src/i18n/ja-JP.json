@@ -23,6 +23,17 @@
     "warning": "警告",
     "info": "情報"
   },
+  "share": {
+    "title": "シェア",
+    "description": "QRコードをスキャンまたはリンクをコピーして友達を招待",
+    "copyHint": "コピーボタンをクリックしてリンクをコピー",
+    "share": "シェア",
+    "downloadQR": "QRコードをダウンロード",
+    "defaultTitle": "Task Wallet タスクウォレット",
+    "defaultDescription": "Task Walletに参加してタスクを完了して報酬を獲得",
+    "copied": "コピーしました",
+    "linkCopied": "リンクがクリップボードにコピーされました"
+  },
   "auth": {
     "login": "ログイン",
     "register": "登録",
@@ -133,7 +144,12 @@
     "balanceDescription": "残高の履歴を表示",
     "securityDescription": "パスワード変更、Google認証",
     "instructionsDescription": "タスクルールとレートを表示",
-    "settingsDescription": "アプリ設定"
+    "settingsDescription": "アプリ設定",
+    "inviteFriends": "友達を招待",
+    "inviteFriendsDescription": "友達を招待して一緒に報酬を獲得",
+    "yourInviteCode": "あなたの招待コード",
+    "shareInvite": "招待をシェア",
+    "inviteShareDescription": "QRコードをスキャンまたはリンクをコピーして友達を招待"
   },
   "accounts": {
     "title": "アカウント管理",

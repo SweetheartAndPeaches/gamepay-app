@@ -23,6 +23,17 @@
     "warning": "Warning",
     "info": "Info"
   },
+  "share": {
+    "title": "Share",
+    "description": "Scan QR code or copy link to invite friends",
+    "copyHint": "Click copy button to copy the link",
+    "share": "Share",
+    "downloadQR": "Download QR Code",
+    "defaultTitle": "Task Wallet",
+    "defaultDescription": "Join Task Wallet and earn rewards by completing tasks",
+    "copied": "Copied",
+    "linkCopied": "Link copied to clipboard"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",
@@ -133,7 +144,12 @@
     "balanceDescription": "View balance history",
     "securityDescription": "Change password, Google verification",
     "instructionsDescription": "View task rules and rates",
-    "settingsDescription": "App settings"
+    "settingsDescription": "App settings",
+    "inviteFriends": "Invite Friends",
+    "inviteFriendsDescription": "Invite friends to join and earn together",
+    "yourInviteCode": "Your Invite Code",
+    "shareInvite": "Share Invite",
+    "inviteShareDescription": "Scan QR code or copy link to invite friends to register"
   },
   "accounts": {
     "title": "Account Management",

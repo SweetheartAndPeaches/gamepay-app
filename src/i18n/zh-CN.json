@@ -26,6 +26,17 @@
     "hoursAgo": "小时前",
     "daysAgo": "天前"
   },
+  "share": {
+    "title": "分享",
+    "description": "扫描二维码或复制链接邀请好友",
+    "copyHint": "点击复制按钮复制链接",
+    "share": "分享",
+    "downloadQR": "下载二维码",
+    "defaultTitle": "Task Wallet 任务钱包",
+    "defaultDescription": "加入 Task Wallet，完成任务赚取收益",
+    "copied": "已复制",
+    "linkCopied": "链接已复制到剪贴板"
+  },
   "auth": {
     "login": "登录",
     "register": "注册",
@@ -136,7 +147,12 @@
     "balanceDescription": "查看余额变动记录",
     "securityDescription": "修改密码、谷歌验证",
     "instructionsDescription": "查看任务规则和费率",
-    "settingsDescription": "应用设置"
+    "settingsDescription": "应用设置",
+    "inviteFriends": "邀请好友",
+    "inviteFriendsDescription": "邀请好友加入，一起赚取收益",
+    "yourInviteCode": "您的邀请码",
+    "shareInvite": "分享邀请",
+    "inviteShareDescription": "扫描二维码或复制链接邀请好友注册"
   },
   "accounts": {
     "title": "账户管理",

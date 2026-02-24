@@ -23,6 +23,17 @@
     "warning": "경고",
     "info": "정보"
   },
+  "share": {
+    "title": "공유",
+    "description": "QR 코드를 스캔하거나 링크를 복사하여 친구를 초대하세요",
+    "copyHint": "복사 버튼을 클릭하여 링크를 복사하세요",
+    "share": "공유",
+    "downloadQR": "QR 코드 다운로드",
+    "defaultTitle": "Task Wallet",
+    "defaultDescription": "Task Wallet에 가입하여 작업을 완료하고 보상을 받으세요",
+    "copied": "복사됨",
+    "linkCopied": "링크가 클립보드에 복사되었습니다"
+  },
   "auth": {
     "login": "로그인",
     "register": "회원가입",
@@ -133,7 +144,12 @@
     "balanceDescription": "잔액 기록 보기",
     "securityDescription": "비밀번호 변경, Google 인증",
     "instructionsDescription": "작업 규칙 및 요금 보기",
-    "settingsDescription": "앱 설정"
+    "settingsDescription": "앱 설정",
+    "inviteFriends": "친구 초대",
+    "inviteFriendsDescription": "친구를 초대하여 함께 보상을 받으세요",
+    "yourInviteCode": "내 초대 코드",
+    "shareInvite": "초대 공유",
+    "inviteShareDescription": "QR 코드를 스캔하거나 링크를 복사하여 친구를 초대하세요"
   },
   "accounts": {
     "title": "계정 관리",
