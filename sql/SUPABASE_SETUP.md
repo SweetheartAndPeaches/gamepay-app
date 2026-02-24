@@ -1,13 +1,5 @@
 # Supabase 数据库设置指南
 
-## 问题诊断
-
-登录失败的原因是数据库表还没有创建。错误信息：
-```
-Could not find the 'balance' column of 'users' in the schema cache
-```
-
-## 解决方案
 
 ### 步骤 1：访问 Supabase Dashboard
 
@@ -295,23 +287,4 @@ DROP FUNCTION IF EXISTS update_updated_at_column() CASCADE;
 2. 找到 **Backups** 选项
 3. Supabase 会自动创建备份
 
-## 完成后的下一步
 
-数据库初始化完成后：
-1. ✅ 注册功能可以正常使用
-2. ✅ 登录功能可以正常使用
-3. ⏳ 需要实现任务系统（代付/代收任务）
-4. ⏳ 需要实现提现功能
-5. ⏳ 需要实现代理系统
-
-## 获取帮助
-
-如果遇到问题：
-- 检查控制台日志：`tail -n 50 /app/work/logs/bypass/app.log`
-- 检查 Supabase 错误信息
-- 确保环境变量配置正确
-
-## 技术支持
-
-Supabase 文档：https://supabase.com/docs
-项目仓库：请查看项目 README.md
