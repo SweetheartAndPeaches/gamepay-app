@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,8 +12,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useI18n } from '@/i18n/context';
-import { CheckCircle, AlertCircle, DollarSign, Clock, Wallet, CreditCard } from 'lucide-react';
+import { CheckCircle, AlertCircle, DollarSign, Clock, Wallet } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Order {
   id: string;
@@ -21,8 +24,6 @@ interface Order {
   commission: number;
   status: 'pending' | 'claimed' | 'completed' | 'expired' | 'cancelled';
   expires_at: string;
-  payment_method?: string | null;
-  payment_account?: string | null;
 }
 
 interface Account {
@@ -37,9 +38,12 @@ interface PayinTaskDetailDialogProps {
   order: Order | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClaim: (orderId: string, accountId: string) => void;
   onConfirm: (orderId: string) => void;
+  isClaiming: boolean;
   isConfirming: boolean;
   userBalance: number;
+  accounts: Account[];
   enabled: boolean;
 }
 
@@ -47,14 +51,26 @@ export default function PayinTaskDetailDialog({
   order,
   open,
   onOpenChange,
+  onClaim,
   onConfirm,
+  isClaiming,
   isConfirming,
   userBalance,
+  accounts,
   enabled,
 }: PayinTaskDetailDialogProps) {
   const { t, formatCurrency } = useI18n();
+  const [selectedAccountId, setSelectedAccountId] = useState('');
 
   if (!order) return null;
+
+  const handleClaim = () => {
+    if (!selectedAccountId) {
+      toast.error('请选择代收账户');
+      return;
+    }
+    onClaim(order.id, selectedAccountId);
+  };
 
   const getStatusBadge = () => {
     switch (order.status) {
@@ -73,8 +89,7 @@ export default function PayinTaskDetailDialog({
     }
   };
 
-  const formatPaymentMethod = (type: string | null) => {
-    if (!type) return '-';
+  const formatPaymentMethod = (type: string) => {
     const methodMap: Record<string, string> = {
       wechat: '微信',
       alipay: '支付宝',
@@ -142,56 +157,71 @@ export default function PayinTaskDetailDialog({
             <span>过期时间：{new Date(order.expires_at).toLocaleString('zh-CN')}</span>
           </div>
 
-          {/* 代收账户信息 */}
-          {order.status === 'claimed' && enabled && (
+          {/* 选择代收账户 */}
+          {order.status === 'pending' && enabled && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <CreditCard className="w-4 h-4" />
-                代收账户
-              </Label>
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="font-medium text-blue-900">
-                  {formatPaymentMethod(order.payment_method || '')}
-                </p>
-                {order.payment_account && (
-                  <p className="text-sm text-blue-700 mt-1">
-                    请使用此账户接收款项
-                  </p>
-                )}
-              </div>
+              <Label className="text-sm font-medium">选择代收账户</Label>
+              <Select
+                value={selectedAccountId}
+                onValueChange={setSelectedAccountId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="请选择代收账户" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.length === 0 ? (
+                    <div className="p-2 text-sm text-gray-500">
+                      暂无代收账户，请先添加
+                    </div>
+                  ) : (
+                    accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{formatPaymentMethod(account.type)}</span>
+                          <span className="text-gray-500">
+                            {account.account_name}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
           {/* 提示信息 */}
-          {order.status === 'claimed' && enabled && (
-            <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">任务进行中</p>
+          {order.status === 'pending' && enabled && (
+            <div className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg">
+              <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-yellow-800">
+                <p className="font-medium mb-1">温馨提示</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
-                  <li>系统已冻结 {formatCurrency(order.amount)} 余额</li>
-                  <li>请使用指定的代收账户接收款项</li>
-                  <li>代收完成后请及时确认收款</li>
-                  <li>确认后会自动解冻余额并发放奖励</li>
+                  <li>领取任务后会冻结对应的余额</li>
+                  <li>代收完成后，代收金额会返还到您的余额</li>
+                  <li>完成代收后可获得佣金奖励</li>
+                  <li>请确保代收账户信息正确</li>
                 </ul>
               </div>
             </div>
           )}
 
-          {order.status === 'completed' && (
-            <div className="flex items-start gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
-              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-green-800">
-                <p className="font-medium mb-1">任务已完成</p>
-                <p className="text-xs">
-                  代收任务已完成，奖励已发放到您的余额
-                </p>
+          {order.status === 'claimed' && (
+            <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium mb-1">进行中</p>
+                <ul className="list-disc list-inside space-y-1 text-xs">
+                  <li>已冻结 {formatCurrency(order.amount)} 余额</li>
+                  <li>请及时完成代收任务</li>
+                  <li>代收完成后确认收到款项即可完成任务</li>
+                </ul>
               </div>
             </div>
           )}
 
           {!enabled && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+            <div className="flex items-start gap-2 p-3 bg-red-50 rounded-lg">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-red-800">
                 <p className="font-medium mb-1">系统维护中</p>
@@ -205,7 +235,17 @@ export default function PayinTaskDetailDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             关闭
           </Button>
-          {order.status === 'claimed' && enabled && (
+          {order.status === 'pending' && enabled && accounts.length > 0 && (
+            <Button onClick={handleClaim} disabled={isClaiming}>
+              {isClaiming ? '领取中...' : '领取任务'}
+            </Button>
+          )}
+          {order.status === 'pending' && enabled && accounts.length === 0 && (
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              去添加账户
+            </Button>
+          )}
+          {order.status === 'claimed' && (
             <Button
               onClick={() => onConfirm(order.id)}
               disabled={isConfirming}

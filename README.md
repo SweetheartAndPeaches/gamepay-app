@@ -198,38 +198,6 @@ JWT_EXPIRES_IN=7d
 
 ## 📚 文档
 
-### 故障排查
-
-#### 代收设置无法保存
-
-如果你遇到"代收设置无法保存"的问题，请按照以下步骤操作：
-
-1. **运行诊断工具**
-   - 访问 `/tasks/payin/settings` 页面
-   - 点击"运行诊断"按钮
-   - 查看诊断结果
-
-2. **检查数据库表**
-   - 确认 `user_settings` 表是否已创建
-   - 如果表不存在，执行以下 SQL 脚本：
-   ```bash
-   # 查看 SQL 脚本
-   cat create-user-settings-table.sql
-   ```
-   - 复制脚本内容到 Supabase SQL Editor 中执行
-
-3. **详细故障排查**
-   - 查看 [PAYIN_SETTINGS_TROUBLESHOOTING.md](./PAYIN_SETTINGS_TROUBLESHOOTING.md) 获取完整排查指南
-
-### 数据库初始化指南
-
-- [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) - 完整的数据库设置指南
-- [create-user-settings-table.sql](./create-user-settings-table.sql) - User Settings 表创建脚本
-
-### 其他文档
-
-- [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) - Vercel 部署指南
-
 - [Supabase 设置指南](./SUPABASE_SETUP.md)
 - [Vercel 部署指南](./VERCEL_DEPLOYMENT.md)
 - [部署检查清单](./DEPLOYMENT_CHECKLIST.md)
