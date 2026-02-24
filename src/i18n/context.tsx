@@ -25,6 +25,7 @@ interface I18nProviderProps {
 export function I18nProvider({ children, initialLocale = defaultLocale }: I18nProviderProps) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const [translations, setTranslations] = useState<any>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   // 从 localStorage 加载语言设置
   useEffect(() => {
@@ -36,7 +37,17 @@ export function I18nProvider({ children, initialLocale = defaultLocale }: I18nPr
 
   // 加载翻译文件
   useEffect(() => {
-    loadTranslations(locale).then(setTranslations);
+    setIsLoading(true);
+    loadTranslations(locale)
+      .then((loadedTranslations) => {
+        console.log(`Loaded translations for ${locale}:`, loadedTranslations);
+        setTranslations(loadedTranslations);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to load translations:', error);
+        setIsLoading(false);
+      });
   }, [locale]);
 
   // 设置语言
@@ -48,7 +59,15 @@ export function I18nProvider({ children, initialLocale = defaultLocale }: I18nPr
 
   // 翻译函数
   const t = useCallback((key: string, params?: Record<string, string | number>): string => {
+    if (isLoading && Object.keys(translations).length === 0) {
+      return key; // 如果还在加载，返回键本身
+    }
     let text = getNestedValue(translations, key);
+    
+    // 调试日志
+    if (text === key && !isLoading) {
+      console.warn(`Translation not found for key: ${key}`, { locale, translations });
+    }
 
     // 如果参数存在，进行替换
     if (params) {
@@ -109,6 +128,18 @@ export function I18nProvider({ children, initialLocale = defaultLocale }: I18nPr
       'de-DE': 'Deutsch',
     },
   };
+
+  // 在翻译加载期间显示加载指示器
+  if (isLoading && Object.keys(translations).length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+          <p className="mt-4 text-sm text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
