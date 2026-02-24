@@ -6,9 +6,12 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useI18n } from '@/i18n/context';
+import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -62,10 +65,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* 头部 */}
       <div className="bg-white shadow-sm">
-        <div className="max-w-md mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-center text-gray-900">
-            任务钱包
+        <div className="max-w-md mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Task Wallet
           </h1>
+          <LanguageSelector />
         </div>
       </div>
 
@@ -83,7 +87,7 @@ export default function LoginPage() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                登录
+                {t('auth.login')}
               </button>
               <button
                 onClick={() => setIsLogin(false)}
@@ -93,17 +97,17 @@ export default function LoginPage() {
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                注册
+                {t('auth.register')}
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="phone">手机号</Label>
+                <Label htmlFor="phone">{t('auth.phone')}</Label>
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="请输入手机号"
+                  placeholder={t('auth.phone')}
                   value={formData.phone}
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
@@ -113,11 +117,11 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <Label htmlFor="password">密码</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="请输入密码"
+                  placeholder={t('auth.password')}
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
@@ -128,11 +132,11 @@ export default function LoginPage() {
 
               {!isLogin && (
                 <div>
-                  <Label htmlFor="inviteCode">邀请码（选填）</Label>
+                  <Label htmlFor="inviteCode">{t('auth.inviteCodeOptional')}</Label>
                   <Input
                     id="inviteCode"
                     type="text"
-                    placeholder="请输入邀请码"
+                    placeholder={t('auth.inviteCode')}
                     value={formData.inviteCode}
                     onChange={(e) =>
                       setFormData({ ...formData, inviteCode: e.target.value })
@@ -146,7 +150,7 @@ export default function LoginPage() {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? '处理中...' : isLogin ? '登录' : '注册'}
+                {loading ? t('common.loading') : isLogin ? t('auth.login') : t('auth.register')}
               </Button>
             </form>
 
@@ -156,7 +160,7 @@ export default function LoginPage() {
                   href="/forgot-password"
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  忘记密码？
+                  {t('auth.forgotPassword')}
                 </Link>
               </div>
             )}

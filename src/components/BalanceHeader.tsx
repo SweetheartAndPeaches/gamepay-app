@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useI18n } from '@/i18n/context';
 
 interface Balance {
   available: string;
@@ -8,6 +9,7 @@ interface Balance {
 }
 
 export default function BalanceHeader() {
+  const { t, formatCurrency } = useI18n();
   const [balance, setBalance] = useState<Balance>({
     available: '0.00',
     frozen: '0.00',
@@ -40,12 +42,12 @@ export default function BalanceHeader() {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 shadow-md">
       <div className="max-w-md mx-auto">
-        <p className="text-sm text-blue-100 mb-1">可用余额（元）</p>
+        <p className="text-sm text-blue-100 mb-1">{t('balance.available')}</p>
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold">{balance.available}</span>
+          <span className="text-3xl font-bold">{formatCurrency(balance.available)}</span>
           {parseFloat(balance.frozen) > 0 && (
             <span className="text-sm text-blue-100">
-              冻结：{balance.frozen}
+              {t('balance.frozen')}: {formatCurrency(balance.frozen)}
             </span>
           )}
         </div>

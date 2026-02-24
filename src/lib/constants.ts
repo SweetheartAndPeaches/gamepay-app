@@ -13,12 +13,23 @@ export const TASK_STATUS = {
   TIMEOUT: 'timeout', // 已超时
 } as const;
 
-// 账户类型
+// 账户类型（支持国际支付）
 export const ACCOUNT_TYPES = {
+  // 中国支付方式
   WECHAT_QRCODE: 'wechat_qrcode', // 微信二维码
   ALIPAY_QRCODE: 'alipay_qrcode', // 支付宝二维码
   ALIPAY_ACCOUNT: 'alipay_account', // 支付宝账号
   BANK_CARD: 'bank_card', // 银行卡
+
+  // 国际支付方式
+  PAYPAL: 'paypal', // PayPal
+  VENMO: 'venmo', // Venmo (美国)
+  CASHAPP: 'cashapp', // Cash App (美国)
+  ZELLE: 'zelle', // Zelle (美国)
+  STRIPE: 'stripe', // Stripe (全球)
+  WISE: 'wise', // Wise (全球)
+  PAYONEER: 'payoneer', // Payoneer (全球)
+  SWIFT: 'swift', // SWIFT 银行转账 (全球)
 } as const;
 
 // 用户状态
