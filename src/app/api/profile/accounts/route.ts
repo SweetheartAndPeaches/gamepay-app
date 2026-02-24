@@ -131,6 +131,8 @@ export async function POST(request: NextRequest) {
     const bankName = formData.get('bankName') as string;
     const usageType = formData.get('usageType') as string; // payin 或 payout
     const qrCodeFile = formData.get('qrCode') as File | null;
+    const payinEnabled = formData.get('payinEnabled') === 'true';
+    const payinMaxAmount = parseFloat(formData.get('payinMaxAmount') as string) || 0;
 
     // 验证必填字段
     if (!accountType || !accountName) {
@@ -259,6 +261,9 @@ export async function POST(request: NextRequest) {
         account_type: accountType,
         account_info: accountInfo,
         is_active: true,
+        // 代收设置
+        payin_enabled: usageType === 'payin' ? payinEnabled : false,
+        payin_max_amount: usageType === 'payin' ? payinMaxAmount : 0,
       })
       .select()
       .single();

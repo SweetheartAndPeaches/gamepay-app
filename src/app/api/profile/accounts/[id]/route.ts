@@ -94,6 +94,8 @@ export async function PUT(
     const accountNumber = formData.get('accountNumber') as string;
     const bankName = formData.get('bankName') as string;
     const qrCodeFile = formData.get('qrCode') as File | null;
+    const payinEnabled = formData.get('payinEnabled') === 'true';
+    const payinMaxAmount = parseFloat(formData.get('payinMaxAmount') as string) || 0;
 
     const client = getSupabaseClient();
 
@@ -116,6 +118,17 @@ export async function PUT(
     const updateData: any = {
       account_info: { ...existingAccount.account_info },
       updated_at: new Date().toISOString(),
+      // 代收设置（仅当账户类型是代收账户时）
+      payin_enabled: existingAccount.account_type.includes('qrcode') ||
+                     existingAccount.account_type === 'bank_card' ||
+                     existingAccount.account_type === 'alipay_account'
+                     ? payinEnabled
+                     : false,
+      payin_max_amount: existingAccount.account_type.includes('qrcode') ||
+                        existingAccount.account_type === 'bank_card' ||
+                        existingAccount.account_type === 'alipay_account'
+                        ? payinMaxAmount
+                        : 0,
     };
 
     // 更新名称

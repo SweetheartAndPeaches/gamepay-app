@@ -156,6 +156,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 更新账户统计信息
+    if (updatedTask.account_id) {
+      // 获取账户信息
+      const { data: account, error: accountError } = await client
+        .from('payment_accounts')
+        .select('payin_allocated_amount, payin_earned_commission, payin_total_count')
+        .eq('id', updatedTask.account_id)
+        .single();
+
+      if (!accountError && account) {
+        const { error: updateAccountError } = await client
+          .from('payment_accounts')
+          .update({
+            payin_allocated_amount: (account.payin_allocated_amount || 0) - taskAmount,
+            payin_earned_commission: (account.payin_earned_commission || 0) + commission,
+            payin_total_count: (account.payin_total_count || 0) + 1,
+            updated_at: now.toISOString(),
+          })
+          .eq('id', updatedTask.account_id);
+
+        if (updateAccountError) {
+          console.error('Update account error:', updateAccountError);
+          // 不影响主流程，只记录错误
+          console.error('Failed to update account payin stats');
+        }
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: '代收完成，奖励已发放',

@@ -132,17 +132,28 @@ export async function POST(request: NextRequest) {
 
     // 检查代收账户是否属于当前用户
     const { data: account, error: accountError } = await client
-      .from('bank_accounts')
+      .from('payment_accounts')
       .select('*')
       .eq('id', accountId)
       .eq('user_id', payload.userId)
-      .eq('status', 'active')
+      .eq('is_active', true)
+      .eq('payin_enabled', true)
       .single();
 
     if (accountError || !account) {
       return NextResponse.json(
-        { success: false, message: '代收账户不存在或已被禁用' },
+        { success: false, message: '代收账户不存在或未启用代收' },
         { status: 404 }
+      );
+    }
+
+    // 检查账户余额是否足够
+    const maxAmount = account.payin_max_amount || 0;
+    const allocatedAmount = account.payin_allocated_amount || 0;
+    if (maxAmount > 0 && allocatedAmount + task.amount > maxAmount) {
+      return NextResponse.json(
+        { success: false, message: '该账户代收金额不足，请调整账户设置' },
+        { status: 400 }
       );
     }
 
@@ -182,6 +193,7 @@ export async function POST(request: NextRequest) {
       .from('payin_task_allocations')
       .update({
         status: 'claimed',
+        account_id: accountId,
         claimed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -195,6 +207,21 @@ export async function POST(request: NextRequest) {
         { success: false, message: '领取任务失败，请重试' },
         { status: 500 }
       );
+    }
+
+    // 更新账户的已分配金额
+    const { error: updateAccountError } = await client
+      .from('payment_accounts')
+      .update({
+        payin_allocated_amount: allocatedAmount + task.amount,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', accountId);
+
+    if (updateAccountError) {
+      console.error('Update account error:', updateAccountError);
+      // 不影响主流程，只记录错误
+      console.error('Failed to update account payin_allocated_amount');
     }
 
     return NextResponse.json({
