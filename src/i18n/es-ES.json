@@ -1,5 +1,6 @@
 {
   "common": {
+    "appName": "Task Wallet",
     "loading": "Cargando...",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
@@ -387,6 +388,7 @@
     "termsOfService": "Términos de servicio",
     "termsOfServiceDescription": "Aprende sobre nuestros términos de servicio y acuerdo de usuario",
     "logoutConfirm": "¿Estás seguro de que deseas cerrar sesión?",
-    "allRightsReserved": "Todos los derechos reservados"
+    "allRightsReserved": "Todos los derechos reservados",
+    "copyright": "© 2024 {appName}. Todos los derechos reservados"
   }
 }

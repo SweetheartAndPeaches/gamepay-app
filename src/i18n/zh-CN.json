@@ -1,5 +1,6 @@
 {
   "common": {
+    "appName": "Task Wallet 任务钱包",
     "loading": "加载中...",
     "confirm": "确定",
     "cancel": "取消",
@@ -391,6 +392,7 @@
     "termsOfService": "服务条款",
     "termsOfServiceDescription": "了解我们的服务条款和用户协议",
     "logoutConfirm": "确定要退出登录吗？",
-    "allRightsReserved": "版权所有"
+    "allRightsReserved": "版权所有",
+    "copyright": "© 2024 {appName}. 版权所有"
   }
 }

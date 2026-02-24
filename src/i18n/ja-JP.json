@@ -1,5 +1,6 @@
 {
   "common": {
+    "appName": "Task Wallet タスクウォレット",
     "loading": "読み込み中...",
     "confirm": "確認",
     "cancel": "キャンセル",
@@ -387,6 +388,7 @@
     "termsOfService": "サービス利用規約",
     "termsOfServiceDescription": "サービス利用規約とユーザー契約を確認",
     "logoutConfirm": "ログアウトしてもよろしいですか？",
-    "allRightsReserved": "全著作権所有"
+    "allRightsReserved": "全著作権所有",
+    "copyright": "© 2024 {appName}. 全著作権所有"
   }
 }

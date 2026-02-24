@@ -357,7 +357,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">
-                        Task Wallet
+                        {t('common.appName')}
                       </h4>
                       <p className="text-sm text-gray-600">
                         {t('settings.taskWalletApp')}
@@ -462,7 +462,7 @@ export default function SettingsPage() {
 
         {/* 版权信息 */}
         <div className="text-center text-sm text-gray-500">
-          <p>© 2024 Task Wallet. {t('settings.allRightsReserved')}</p>
+          <p>{t('settings.copyright', { appName: t('common.appName') })}</p>
         </div>
       </div>
     </MainLayout>

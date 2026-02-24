@@ -1,5 +1,6 @@
 {
   "common": {
+    "appName": "Task Wallet 작업 지갑",
     "loading": "로딩 중...",
     "confirm": "확인",
     "cancel": "취소",
@@ -387,6 +388,7 @@
     "termsOfService": "이용약관",
     "termsOfServiceDescription": "서비스 약관 및 사용자 계약 알아보기",
     "logoutConfirm": "로그아웃하시겠습니까?",
-    "allRightsReserved": "모든 권리 보유"
+    "allRightsReserved": "모든 권리 보유",
+    "copyright": "© 2024 {appName}. 모든 권리 보유"
   }
 }
