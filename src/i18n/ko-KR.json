@@ -224,7 +224,10 @@
     "referrals": "추천인 수",
     "promotion": "홍보 방법",
     "shareQrcode": "QR 코드 공유",
-    "commissions": "커미션 내역"
+    "commissions": "커미션 내역",
+    "linkCopied": "링크가 클립보드에 복사되었습니다",
+    "shareInvite": "초대 공유",
+    "shareInviteDescription": "QR 코드를 스캔하거나 링크를 복사하여 친구를 에이전트로 초대하세요"
   },
   "security": {
     "title": "보안 설정",

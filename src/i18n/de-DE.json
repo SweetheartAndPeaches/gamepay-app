@@ -224,7 +224,10 @@
     "referrals": "Empfehlungen",
     "promotion": "Promotionsmethoden",
     "shareQrcode": "QR-Code teilen",
-    "commissions": "Provisionsdetails"
+    "commissions": "Provisionsdetails",
+    "linkCopied": "Link in die Zwischenablage kopiert",
+    "shareInvite": "Einladung teilen",
+    "shareInviteDescription": "QR-Code scannen oder Link kopieren, um Freunde als Agenten einzuladen"
   },
   "security": {
     "title": "Sicherheitseinstellungen",

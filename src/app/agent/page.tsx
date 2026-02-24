@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ShareDialog from '@/components/ShareDialog';
 import { useI18n } from '@/i18n/context';
 import {
   Users,
@@ -32,11 +33,15 @@ interface Commission {
 
 export default function AgentPage() {
   const { t, formatCurrency } = useI18n();
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+
   const [agentData] = useState({
     isActive: true,
     totalReferrals: 15,
     totalCommission: '150.00',
     todayCommission: '5.50',
+    inviteCode: 'AGENT12345',
   });
 
   const [subUsers] = useState<SubUser[]>([
@@ -51,14 +56,22 @@ export default function AgentPage() {
     { id: '3', amount: '0.45', type: 'payout', fromUser: '137****9012', createdAt: '2024-01-01' },
   ]);
 
-  const handleCopyLink = () => {
-    // TODO: 实现复制推广链接
-    console.log('Copy referral link');
+  const handleCopyLink = async () => {
+    // 生成推广链接并复制
+    const inviteUrl = `${window.location.origin}?inviteCode=${agentData.inviteCode}&type=agent`;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      alert(t('agent.linkCopied'));
+    } catch (error) {
+      console.error('Failed to copy link:', error);
+    }
   };
 
   const handleShare = () => {
-    // TODO: 实现分享功能
-    console.log('Share');
+    // 打开分享对话框
+    const inviteUrl = `${window.location.origin}?inviteCode=${agentData.inviteCode}&type=agent`;
+    setShareUrl(inviteUrl);
+    setShareOpen(true);
   };
 
   return (
@@ -209,6 +222,15 @@ export default function AgentPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* 分享对话框 */}
+      <ShareDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        shareUrl={shareUrl}
+        title={t('agent.shareInvite')}
+        description={t('agent.shareInviteDescription')}
+      />
     </MainLayout>
   );
 }

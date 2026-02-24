@@ -224,7 +224,10 @@
     "referrals": "Referidos",
     "promotion": "Métodos de promoción",
     "shareQrcode": "Compartir código QR",
-    "commissions": "Detalles de comisión"
+    "commissions": "Detalles de comisión",
+    "linkCopied": "Enlace copiado al portapapeles",
+    "shareInvite": "Compartir invitación",
+    "shareInviteDescription": "Escanea el código QR o copia el enlace para invitar amigos a convertirse en agentes"
   },
   "security": {
     "title": "Configuración de seguridad",

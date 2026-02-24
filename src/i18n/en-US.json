@@ -225,7 +225,10 @@
     "promotion": "Promotion Methods",
     "copyLink": "Copy Link",
     "shareQrcode": "Share QR Code",
-    "commissions": "Commission Details"
+    "commissions": "Commission Details",
+    "linkCopied": "Link copied to clipboard",
+    "shareInvite": "Share Invite",
+    "shareInviteDescription": "Scan QR code or copy link to invite friends to become agents"
   },
   "security": {
     "title": "Security Settings",

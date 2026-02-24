@@ -224,7 +224,10 @@
     "referrals": "紹介者数",
     "promotion": "プロモーション方法",
     "shareQrcode": "QRコードを共有",
-    "commissions": "コミッション明細"
+    "commissions": "コミッション明細",
+    "linkCopied": "リンクがクリップボードにコピーされました",
+    "shareInvite": "招待をシェア",
+    "shareInviteDescription": "QRコードをスキャンまたはリンクをコピーして友達をエージェントに招待"
   },
   "security": {
     "title": "セキュリティ設定",

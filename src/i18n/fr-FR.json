@@ -224,7 +224,10 @@
     "referrals": "Parrainages",
     "promotion": "Méthodes de promotion",
     "shareQrcode": "Partager le code QR",
-    "commissions": "Détails des commissions"
+    "commissions": "Détails des commissions",
+    "linkCopied": "Lien copié dans le presse-papiers",
+    "shareInvite": "Partager l'invitation",
+    "shareInviteDescription": "Scannez le code QR ou copiez le lien pour inviter des amis à devenir agents"
   },
   "security": {
     "title": "Paramètres de sécurité",

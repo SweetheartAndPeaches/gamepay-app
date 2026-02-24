@@ -228,7 +228,10 @@
     "promotion": "推广方式",
     "copyLink": "复制链接",
     "shareQrcode": "分享二维码",
-    "commissions": "佣金明细"
+    "commissions": "佣金明细",
+    "linkCopied": "链接已复制到剪贴板",
+    "shareInvite": "分享邀请",
+    "shareInviteDescription": "扫描二维码或复制链接邀请好友成为代理"
   },
   "security": {
     "title": "安全设置",
