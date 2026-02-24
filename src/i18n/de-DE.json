@@ -203,7 +203,11 @@
     "withdrawal": "Abhebung",
     "deposit": "Einzahlung",
     "freeze": "Einfrieren",
-    "unfreeze": "Auftauen"
+    "unfreeze": "Auftauen",
+    "income": "Einnahmen",
+    "outcome": "Ausgaben",
+    "totalIncome": "Gesamteinnahmen",
+    "totalOutcome": "Gesamtausgaben"
   },
   "withdrawal": {
     "title": "Abhebung",

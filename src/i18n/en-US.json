@@ -203,7 +203,11 @@
     "withdrawal": "Withdrawal",
     "deposit": "Deposit",
     "freeze": "Freeze",
-    "unfreeze": "Unfreeze"
+    "unfreeze": "Unfreeze",
+    "income": "Income",
+    "outcome": "Outcome",
+    "totalIncome": "Total Income",
+    "totalOutcome": "Total Outcome"
   },
   "withdrawal": {
     "title": "Withdrawal",

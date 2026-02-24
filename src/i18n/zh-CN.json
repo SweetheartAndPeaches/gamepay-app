@@ -20,7 +20,10 @@
     "success": "成功",
     "error": "错误",
     "warning": "警告",
-    "info": "提示"
+    "info": "提示",
+    "minAgo": "分钟前",
+    "hoursAgo": "小时前",
+    "daysAgo": "天前"
   },
   "auth": {
     "login": "登录",
@@ -203,7 +206,11 @@
     "withdrawal": "提现",
     "deposit": "充值",
     "freeze": "冻结",
-    "unfreeze": "解冻"
+    "unfreeze": "解冻",
+    "income": "收入",
+    "outcome": "支出",
+    "totalIncome": "总收入",
+    "totalOutcome": "总支出"
   },
   "withdrawal": {
     "title": "提现",

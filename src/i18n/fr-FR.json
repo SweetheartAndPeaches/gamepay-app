@@ -203,7 +203,11 @@
     "withdrawal": "Retrait",
     "deposit": "Dépôt",
     "freeze": "Bloquer",
-    "unfreeze": "Débloquer"
+    "unfreeze": "Débloquer",
+    "income": "Revenus",
+    "outcome": "Dépenses",
+    "totalIncome": "Revenus totaux",
+    "totalOutcome": "Dépenses totales"
   },
   "withdrawal": {
     "title": "Retrait",

@@ -6,6 +6,7 @@ import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
+import { useI18n } from '@/i18n/context';
 import {
   Settings,
   Shield,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function ProfilePage() {
+  const { t } = useI18n();
   const [user] = useState({
     phone: '138****8888',
     inviteCode: 'ABC12345',
@@ -25,33 +27,33 @@ export default function ProfilePage() {
   const menuItems = [
     {
       icon: CreditCard,
-      label: '收付款账户',
+      label: 'profile.accounts',
       href: '/profile/accounts',
-      description: '管理微信、支付宝账户',
+      description: 'profile.accountsDescription',
     },
     {
       icon: Wallet,
-      label: '余额明细',
+      label: 'profile.balanceDetails',
       href: '/profile/balance',
-      description: '查看余额变动记录',
+      description: 'profile.balanceDescription',
     },
     {
       icon: Shield,
-      label: '安全设置',
+      label: 'profile.security',
       href: '/profile/security',
-      description: '修改密码、谷歌验证',
+      description: 'profile.securityDescription',
     },
     {
       icon: FileText,
-      label: '任务说明',
+      label: 'profile.instructions',
       href: '/profile/instructions',
-      description: '查看任务规则和费率',
+      description: 'profile.instructionsDescription',
     },
     {
       icon: Settings,
-      label: '系统设置',
+      label: 'profile.settings',
       href: '/profile/settings',
-      description: '应用设置',
+      description: 'profile.settingsDescription',
     },
   ];
 
@@ -76,7 +78,7 @@ export default function ProfilePage() {
                 {user.phone}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                邀请码：{user.inviteCode}
+                {t('profile.inviteCode')}：{user.inviteCode}
               </p>
             </div>
           </div>
@@ -97,8 +99,8 @@ export default function ProfilePage() {
                     <Icon className="w-5 h-5 text-blue-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{item.label}</h3>
-                    <p className="text-sm text-gray-600">{item.description}</p>
+                    <h3 className="font-medium text-gray-900">{t(item.label)}</h3>
+                    <p className="text-sm text-gray-600">{t(item.description)}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-400" />
                 </Link>
@@ -114,7 +116,7 @@ export default function ProfilePage() {
           onClick={handleLogout}
         >
           <LogOut className="w-4 h-4 mr-2" />
-          退出登录
+          {t('auth.logout')}
         </Button>
       </div>
     </MainLayout>

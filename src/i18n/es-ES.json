@@ -203,7 +203,11 @@
     "withdrawal": "Retiro",
     "deposit": "Depósito",
     "freeze": "Congelar",
-    "unfreeze": "Descongelar"
+    "unfreeze": "Descongelar",
+    "income": "Ingresos",
+    "outcome": "Gastos",
+    "totalIncome": "Ingresos totales",
+    "totalOutcome": "Gastos totales"
   },
   "withdrawal": {
     "title": "Retiro",

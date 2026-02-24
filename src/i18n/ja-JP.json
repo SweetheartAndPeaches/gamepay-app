@@ -203,7 +203,11 @@
     "withdrawal": "出金",
     "deposit": "入金",
     "freeze": "凍結",
-    "unfreeze": "凍結解除"
+    "unfreeze": "凍結解除",
+    "income": "収入",
+    "outcome": "支出",
+    "totalIncome": "総収入",
+    "totalOutcome": "総支出"
   },
   "withdrawal": {
     "title": "出金",
