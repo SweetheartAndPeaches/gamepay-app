@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n/context';
+import { useAuth } from '@/contexts/AuthContext';
 import { LanguageSelector } from '@/components/LanguageSelector';
 
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useI18n();
+  const { login } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,7 +28,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // TODO: 实现登录/注册逻辑
       if (isLogin) {
         // 登录
         const response = await fetch('/api/auth/login', {
@@ -40,7 +41,15 @@ export default function LoginPage() {
         });
 
         if (response.ok) {
-          router.push('/tasks/payout');
+          const data = await response.json();
+          if (data.success && data.data.token) {
+            // 使用 AuthContext 保存 token 和用户信息
+            login(data.data.token, data.data.user);
+            router.push('/tasks/payout');
+          }
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || t('auth.loginFailed'));
         }
       } else {
         // 注册
@@ -51,11 +60,20 @@ export default function LoginPage() {
         });
 
         if (response.ok) {
-          setIsLogin(true);
+          const data = await response.json();
+          if (data.success && data.data.token) {
+            // 使用 AuthContext 保存 token 和用户信息
+            login(data.data.token, data.data.user);
+            router.push('/tasks/payout');
+          }
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || t('auth.registerFailed'));
         }
       }
     } catch (error) {
       console.error('Auth error:', error);
+      alert(t('common.networkError'));
     } finally {
       setLoading(false);
     }

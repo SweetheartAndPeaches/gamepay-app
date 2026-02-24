@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inspector } from 'react-dev-inspector';
 import { I18nProvider } from '@/i18n/context';
+import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -29,9 +30,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`antialiased`}>
         {isDev && <Inspector />}
-        <I18nProvider>
-          {children}
-        </I18nProvider>
+        <AuthProvider>
+          <I18nProvider>
+            {children}
+          </I18nProvider>
+        </AuthProvider>
       </body>
     </html>
   );

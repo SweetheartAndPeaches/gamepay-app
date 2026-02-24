@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import ShareDialog from '@/components/ShareDialog';
 import { useI18n } from '@/i18n/context';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Settings,
   Shield,
@@ -22,14 +24,20 @@ import {
 
 export default function ProfilePage() {
   const { t } = useI18n();
-  const [user] = useState({
-    phone: '138****8888',
-    inviteCode: 'ABC12345',
-  });
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
 
+  // 检查是否登录
+  useEffect(() => {
+    if (!user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
   const handleShare = () => {
+    if (!user) return;
     // 生成分享链接，包含邀请码
     const inviteUrl = `${window.location.origin}?inviteCode=${user.inviteCode}`;
     setShareUrl(inviteUrl);
@@ -70,9 +78,17 @@ export default function ProfilePage() {
   ];
 
   const handleLogout = () => {
-    // TODO: 实现登出逻辑
-    console.log('Logout');
+    logout();
+    router.push('/');
   };
+
+  // 如果用户未登录，不渲染内容
+  if (!user) {
+    return null;
+  }
+
+  // 格式化手机号，隐藏中间4位
+  const maskedPhone = user.phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
 
   return (
     <MainLayout showBalance={false}>
@@ -82,12 +98,12 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16 bg-blue-600">
               <span className="text-white text-2xl font-bold">
-                {user.phone.charAt(0)}
+                {maskedPhone.charAt(0)}
               </span>
             </Avatar>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900">
-                {user.phone}
+                {maskedPhone}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 {t('profile.inviteCode')}：{user.inviteCode}
