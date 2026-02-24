@@ -39,10 +39,10 @@ export async function POST(request: NextRequest) {
 
     // 检查用户是否已有未完成的任务
     const { data: activeTask, error: activeTaskError } = await client
-      .from('orders')
+      .from('tasks')
       .select('*')
-      .eq('user_id', payload.userId)
-      .eq('type', 'payout')
+      .eq('claimed_by', payload.userId)
+      .eq('task_type', 'payout')
       .eq('status', 'claimed')
       .maybeSingle();
 
@@ -63,10 +63,10 @@ export async function POST(request: NextRequest) {
 
     // 检查订单是否可领取
     const { data: order, error: orderError } = await client
-      .from('orders')
+      .from('tasks')
       .select('*')
       .eq('id', orderId)
-      .eq('type', 'payout')
+      .eq('task_type', 'payout')
       .eq('status', 'pending')
       .single();
 
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查任务是否已过期
-    if (new Date(order.expires_at) < new Date()) {
+    if (new Date(order.expired_at) < new Date()) {
       return NextResponse.json(
         { success: false, message: '任务已过期' },
         { status: 400 }
@@ -87,10 +87,11 @@ export async function POST(request: NextRequest) {
 
     // 领取任务
     const { data: updatedOrder, error: updateError } = await client
-      .from('orders')
+      .from('tasks')
       .update({
-        user_id: payload.userId,
+        claimed_by: payload.userId,
         status: 'claimed',
+        claimed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq('id', orderId)

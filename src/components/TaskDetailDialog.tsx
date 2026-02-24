@@ -14,19 +14,24 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useI18n } from '@/i18n/context';
-import { Copy, Upload, CheckCircle, AlertCircle, DollarSign, Clock } from 'lucide-react';
+import { Copy, CheckCircle, AlertCircle, DollarSign, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Order {
   id: string;
   order_no: string;
   amount: number;
-  commission: number;
+  reward_ratio: number;
   status: 'pending' | 'claimed' | 'completed' | 'expired' | 'cancelled';
-  payment_method: string | null;
-  payment_account: string | null;
-  payment_screenshot_url: string | null;
-  expires_at: string;
+  payment_info: {
+    payment_method: string;
+    payment_account: string;
+    account_name: string;
+    account_bank: string;
+  };
+  claimed_by: string | null;
+  expired_at: string;
+  created_at: string;
 }
 
 interface TaskDetailDialogProps {
@@ -50,10 +55,26 @@ export default function TaskDetailDialog({
 
   if (!order) return null;
 
-  // 解析支付账户信息
-  const paymentInfo = order.payment_account
-    ? JSON.parse(order.payment_account)
-    : null;
+  // 计算佣金
+  const commission = order.amount * order.reward_ratio;
+
+  // 格式化支付方式
+  const formatPaymentMethod = (method: string): string => {
+    const methodMap: Record<string, string> = {
+      wechat: '微信',
+      alipay: '支付宝',
+      bank: '银行卡',
+      paypal: 'PayPal',
+      venmo: 'Venmo',
+      cash_app: 'Cash App',
+      zelle: 'Zelle',
+      stripe: 'Stripe',
+      wise: 'Wise',
+      payoneer: 'Payoneer',
+      swift: 'SWIFT',
+    };
+    return methodMap[method] || method;
+  };
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -87,24 +108,6 @@ export default function TaskDetailDialog({
     }
   };
 
-  const formatPaymentMethod = (method: string | null) => {
-    if (!method) return '-';
-    const methodMap: Record<string, string> = {
-      wechat: '微信支付',
-      alipay: '支付宝',
-      bank: '银行卡',
-      paypal: 'PayPal',
-      venmo: 'Venmo',
-      cash_app: 'Cash App',
-      zelle: 'Zelle',
-      stripe: 'Stripe',
-      wise: 'Wise',
-      payoneer: 'Payoneer',
-      swift: 'SWIFT',
-    };
-    return methodMap[method] || method;
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -134,7 +137,7 @@ export default function TaskDetailDialog({
                 <span className="text-sm font-medium">任务奖励</span>
               </div>
               <p className="text-2xl font-bold text-green-700">
-                +{formatCurrency(order.commission)}
+                +{formatCurrency(commission.toString())}
               </p>
             </div>
           </div>
@@ -142,32 +145,32 @@ export default function TaskDetailDialog({
           {/* 过期时间 */}
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Clock className="w-4 h-4" />
-            <span>过期时间：{new Date(order.expires_at).toLocaleString('zh-CN')}</span>
+            <span>过期时间：{new Date(order.expired_at).toLocaleString('zh-CN')}</span>
           </div>
 
           {/* 支付信息 */}
-          {order.status === 'claimed' && paymentInfo && (
+          {order.status === 'claimed' && order.payment_info && (
             <div className="border rounded-lg p-4 space-y-3">
               <h3 className="font-semibold text-sm text-gray-700">收款信息</h3>
 
               <div>
                 <Label className="text-xs text-gray-600">支付方式</Label>
-                <p className="font-medium">{formatPaymentMethod(order.payment_method)}</p>
+                <p className="font-medium">{formatPaymentMethod(order.payment_info.payment_method)}</p>
               </div>
 
-              {paymentInfo.name && (
+              {order.payment_info.account_name && (
                 <div className="space-y-1">
                   <Label className="text-xs text-gray-600">收款人</Label>
                   <div className="flex items-center gap-2">
                     <Input
-                      value={paymentInfo.name}
+                      value={order.payment_info.account_name}
                       readOnly
                       className="flex-1"
                     />
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => handleCopy(paymentInfo.name, 'name')}
+                      onClick={() => handleCopy(order.payment_info.account_name, 'name')}
                     >
                       {copiedField === 'name' ? (
                         <CheckCircle className="w-4 h-4 text-green-600" />
@@ -179,19 +182,19 @@ export default function TaskDetailDialog({
                 </div>
               )}
 
-              {paymentInfo.account && (
+              {order.payment_info.payment_account && (
                 <div className="space-y-1">
                   <Label className="text-xs text-gray-600">收款账号</Label>
                   <div className="flex items-center gap-2">
                     <Input
-                      value={paymentInfo.account}
+                      value={order.payment_info.payment_account}
                       readOnly
                       className="flex-1"
                     />
                     <Button
                       size="icon"
                       variant="outline"
-                      onClick={() => handleCopy(paymentInfo.account, 'account')}
+                      onClick={() => handleCopy(order.payment_info.payment_account, 'account')}
                     >
                       {copiedField === 'account' ? (
                         <CheckCircle className="w-4 h-4 text-green-600" />
@@ -203,17 +206,27 @@ export default function TaskDetailDialog({
                 </div>
               )}
 
-              {paymentInfo.bank && (
-                <div>
-                  <Label className="text-xs text-gray-600">开户银行</Label>
-                  <p className="font-medium">{paymentInfo.bank}</p>
-                </div>
-              )}
-
-              {paymentInfo.branch && (
-                <div>
+              {order.payment_info.account_bank && (
+                <div className="space-y-1">
                   <Label className="text-xs text-gray-600">开户行</Label>
-                  <p className="font-medium">{paymentInfo.branch}</p>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={order.payment_info.account_bank}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleCopy(order.payment_info.account_bank, 'bank')}
+                    >
+                      {copiedField === 'bank' ? (
+                        <CheckCircle className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -228,18 +241,8 @@ export default function TaskDetailDialog({
                   placeholder="请输入支付凭证图片 URL"
                   value={screenshotUrl}
                   onChange={(e) => setScreenshotUrl(e.target.value)}
-                  disabled={!!order.payment_screenshot_url}
                 />
-                <Button size="icon" variant="outline">
-                  <Upload className="w-4 h-4" />
-                </Button>
               </div>
-              {order.payment_screenshot_url && (
-                <div className="flex items-center gap-2 text-sm text-green-600">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>已上传支付凭证</span>
-                </div>
-              )}
             </div>
           )}
 
@@ -261,17 +264,9 @@ export default function TaskDetailDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             关闭
           </Button>
-          {order.status === 'claimed' && !order.payment_screenshot_url && (
+          {order.status === 'claimed' && (
             <Button onClick={handleUpload} disabled={isCompleting}>
               {isCompleting ? '提交中...' : '提交支付凭证'}
-            </Button>
-          )}
-          {order.status === 'claimed' && order.payment_screenshot_url && (
-            <Button
-              onClick={() => onComplete(order.id, order.payment_screenshot_url!)}
-              disabled={isCompleting}
-            >
-              {isCompleting ? '提交中...' : '完成任务'}
             </Button>
           )}
         </DialogFooter>

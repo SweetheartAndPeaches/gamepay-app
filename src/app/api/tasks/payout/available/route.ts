@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
 
     // 获取用户当前是否有未完成的任务
     const { data: activeTask, error: activeTaskError } = await client
-      .from('orders')
+      .from('tasks')
       .select('*')
-      .eq('user_id', payload.userId)
-      .eq('type', 'payout')
+      .eq('claimed_by', payload.userId)
+      .eq('task_type', 'payout')
       .eq('status', 'claimed')
       .maybeSingle();
 
@@ -55,11 +55,11 @@ export async function GET(request: NextRequest) {
 
     // 获取可领取的任务列表
     const { data: tasks, error: tasksError } = await client
-      .from('orders')
+      .from('tasks')
       .select('*')
-      .eq('type', 'payout')
+      .eq('task_type', 'payout')
       .eq('status', 'pending')
-      .gt('expires_at', new Date().toISOString())
+      .gt('expired_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(20);
 
