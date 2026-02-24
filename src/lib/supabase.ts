@@ -1,13 +1,61 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// TODO: 从环境变量中获取 Supabase 配置
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+// 客户端 Supabase 配置（浏览器端使用）
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// 创建 Supabase 客户端实例
-// 注意：如果没有配置正确的环境变量，这将创建一个无效的客户端
-// 在实际使用前，请确保配置了正确的环境变量
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// 验证环境变量
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. Please check your .env.local file:\n' +
+    '  NEXT_PUBLIC_SUPABASE_URL=https://eplavqbtysmknzdcbgbq.supabase.co\n' +
+    '  NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here'
+  );
+}
+
+// 创建 Supabase 客户端实例（客户端使用）
+export const supabase = createClient(supabaseUrl!, supabaseAnonKey!, {
+  db: {
+    timeout: 60000,
+  },
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+  },
+});
+
+// 创建带认证的 Supabase 客户端（用于需要用户 token 的请求）
+export function getSupabaseClient(token?: string): SupabaseClient {
+  if (token) {
+    return createClient(supabaseUrl!, supabaseAnonKey!, {
+      global: {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+      db: {
+        timeout: 60000,
+      },
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  }
+  return supabase;
+}
+
+// 获取数据库连接字符串（服务端使用）
+export function getDatabaseUrl(): string {
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (!databaseUrl) {
+    throw new Error(
+      'Missing DATABASE_URL environment variable. Please check your .env.local file:\n' +
+      '  DATABASE_URL=postgresql://postgres:password@db.eplavqbtysmknzdcbgbq.supabase.co:5432/postgres'
+    );
+  }
+  
+  return databaseUrl;
+}
 
 // 导出类型定义
 export type Database = {
