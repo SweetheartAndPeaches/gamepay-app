@@ -302,38 +302,6 @@ INSERT INTO system_settings (key, value, description) VALUES
 ON CONFLICT (key) DO NOTHING;
 
 -- ============================================
--- 插入代收任务示例数据（可以从其他系统同步）
--- ============================================
-INSERT INTO payin_task_allocations (
-  user_id,
-  order_no,
-  amount,
-  commission,
-  payment_method,
-  payment_account_info,
-  expires_at
-) VALUES
-  (
-    NULL, -- user_id 会在分配时设置
-    'PAYIN001',
-    500.00,
-    7.50,
-    'wechat',
-    '{"name": "张三", "account": "wx123456", "type": "微信"}',
-    timezone('utc'::text, now()) + interval '30 minutes'
-  ),
-  (
-    NULL,
-    'PAYIN002',
-    800.00,
-    12.00,
-    'alipay',
-    '{"name": "李四", "account": "ali123456", "type": "支付宝"}',
-    timezone('utc'::text, now()) + interval '30 minutes'
-  )
-ON CONFLICT (order_no) DO NOTHING;
-
--- ============================================
 -- 完成提示
 -- ============================================
 -- 所有表已成功创建
@@ -359,6 +327,30 @@ ON CONFLICT (order_no) DO NOTHING;
 --
 -- 系统配置：
 -- - system_settings: 系统配置表
+--
+-- ============================================
+-- 插入测试代收任务（可选）
+-- ============================================
+-- 如需插入测试数据，请先创建测试用户，然后执行：
+--
+-- INSERT INTO payin_task_allocations (
+--   user_id,
+--   order_no,
+--   amount,
+--   commission,
+--   payment_method,
+--   payment_account_info,
+--   expires_at
+-- ) VALUES
+-- (
+--   '你的用户ID',
+--   'PAYIN001',
+--   500.00,
+--   7.50,
+--   'wechat',
+--   '{"name": "张三", "account": "wx123456", "type": "微信"}',
+--   timezone('utc'::text, now()) + interval '30 minutes'
+-- );
 --
 -- ============================================
 -- payment_account_info 字段结构示例：
