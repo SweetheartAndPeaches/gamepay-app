@@ -25,31 +25,8 @@ interface TaskGroup {
 }
 
 export default function PayoutTasksPage() {
-  const { t, formatCurrency, locale } = useI18n();
-  
-  // 获取所有翻译用于调试
-  const allTranslations = {
-    payoutTitle: t('tasks.payout.title'),
-    payoutTotalTasks: t('tasks.payout.totalTasks'),
-    payoutDescription: t('tasks.payout.description'),
-    payoutTaskRange: t('tasks.payout.taskRange'),
-    payoutProgress: t('tasks.payout.progress', { current: 1, total: 3 }),
-    payoutInProgress: t('tasks.payout.inProgress'),
-    payoutOrderNo: t('tasks.payout.orderNo'),
-    payoutOrderAmount: t('tasks.payout.orderAmount'),
-    payoutReward: t('tasks.payout.reward'),
-    payoutExpiryTime: t('tasks.payout.expiryTime'),
-    payoutClaimTask: t('tasks.payout.claimTask'),
-    payoutMarkCompleted: t('tasks.payout.markCompleted'),
-    payoutCompleted: t('tasks.payout.completed'),
-    statusPending: t('tasks.payout.status.pending'),
-    statusClaimed: t('tasks.payout.status.claimed'),
-    statusCompleted: t('tasks.payout.status.completed'),
-  };
+  const { t, formatCurrency } = useI18n();
 
-  console.log('PayoutTasksPage - Current locale:', locale);
-  console.log('PayoutTasksPage - All translations:', allTranslations);
-  
   const [taskGroups, setTaskGroups] = useState<TaskGroup[]>([
     {
       range: '100-500',
@@ -124,17 +101,7 @@ export default function PayoutTasksPage() {
 
   return (
     <MainLayout showBalance={false}>
-      {/* 调试面板 */}
-      <div className="fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-300 p-2 z-50 text-xs overflow-auto max-h-32">
-        <strong>调试信息：</strong>
-        <div>Locale: {locale}</div>
-        <div>Payout Title: {t('tasks.payout.title')}</div>
-        <div>Payout Total Tasks: {t('tasks.payout.totalTasks')}</div>
-        <div>Status Pending: {t('tasks.payout.status.pending')}</div>
-        <div>Task Range: {t('tasks.payout.taskRange')}</div>
-      </div>
-
-      <div className="p-4 space-y-4 mt-12">
+      <div className="p-4 space-y-4">
         <h1 className="text-xl font-bold text-gray-900">{t('tasks.payout.title')}</h1>
 
         <Card className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white">

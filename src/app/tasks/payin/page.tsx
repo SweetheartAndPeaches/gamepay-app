@@ -18,15 +18,8 @@ interface Task {
 }
 
 export default function PayinTasksPage() {
-  const { t, formatCurrency, locale } = useI18n();
-  
-  console.log('PayinTasksPage - Current locale:', locale);
-  console.log('PayinTasksPage - Translation test:', {
-    title: t('tasks.payin.title'),
-    totalTasks: t('tasks.payin.totalTasks'),
-    description: t('tasks.payin.description'),
-  });
-  
+  const { t, formatCurrency } = useI18n();
+
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',
@@ -77,15 +70,7 @@ export default function PayinTasksPage() {
 
   return (
     <MainLayout showBalance={false}>
-      {/* 调试面板 */}
-      <div className="fixed top-0 left-0 right-0 bg-yellow-100 border-b border-yellow-300 p-2 z-50 text-xs">
-        <strong>调试信息：</strong>
-        <div>Locale: {locale}</div>
-        <div>Title: {t('tasks.payin.title')}</div>
-        <div>Total Tasks: {t('tasks.payin.totalTasks')}</div>
-      </div>
-
-      <div className="p-4 space-y-4 mt-12">
+      <div className="p-4 space-y-4">
         <h1 className="text-xl font-bold text-gray-900">{t('tasks.payin.title')}</h1>
 
         <Card className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white">
