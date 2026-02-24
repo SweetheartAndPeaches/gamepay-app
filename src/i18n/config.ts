@@ -3,7 +3,7 @@ export const locales = ['zh-CN', 'en-US', 'ja-JP', 'ko-KR', 'es-ES', 'fr-FR', 'd
 export type Locale = (typeof locales)[number];
 
 // 默认语言
-export const defaultLocale: Locale = 'en-US';
+export const defaultLocale: Locale = 'zh-CN';
 
 // 语言名称映射
 export const localeNames: Record<Locale, string> = {

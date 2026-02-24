@@ -18,7 +18,15 @@ interface Task {
 }
 
 export default function PayinTasksPage() {
-  const { t, formatCurrency } = useI18n();
+  const { t, formatCurrency, locale } = useI18n();
+  
+  console.log('PayinTasksPage - Current locale:', locale);
+  console.log('PayinTasksPage - Translation test:', {
+    title: t('payin.title'),
+    totalTasks: t('payin.totalTasks'),
+    description: t('payin.description'),
+  });
+  
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: '1',

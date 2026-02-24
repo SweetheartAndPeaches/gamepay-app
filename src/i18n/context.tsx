@@ -26,13 +26,23 @@ export function I18nProvider({ children, initialLocale = defaultLocale }: I18nPr
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
   const [translations, setTranslations] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // 从 localStorage 加载语言设置
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale') as Locale;
+    console.log('Checking saved locale from localStorage:', savedLocale);
+    
     if (savedLocale && ['zh-CN', 'en-US', 'ja-JP', 'ko-KR', 'es-ES', 'fr-FR', 'de-DE'].includes(savedLocale)) {
+      console.log('Using saved locale:', savedLocale);
       setLocaleState(savedLocale);
+    } else {
+      console.log('No valid saved locale, using default:', defaultLocale);
+      // 如果没有有效的保存语言，使用默认语言并保存到 localStorage
+      localStorage.setItem('locale', defaultLocale);
+      setLocaleState(defaultLocale);
     }
+    setIsInitialized(true);
   }, []);
 
   // 加载翻译文件

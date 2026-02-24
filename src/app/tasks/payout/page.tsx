@@ -25,7 +25,15 @@ interface TaskGroup {
 }
 
 export default function PayoutTasksPage() {
-  const { t, formatCurrency } = useI18n();
+  const { t, formatCurrency, locale } = useI18n();
+  
+  console.log('PayoutTasksPage - Current locale:', locale);
+  console.log('PayoutTasksPage - Translation test:', {
+    title: t('payout.title'),
+    totalTasks: t('payout.totalTasks'),
+    description: t('payout.description'),
+  });
+  
   const [taskGroups, setTaskGroups] = useState<TaskGroup[]>([
     {
       range: '100-500',

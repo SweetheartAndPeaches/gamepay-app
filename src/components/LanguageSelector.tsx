@@ -28,7 +28,9 @@ export function LanguageSelector() {
     >
       <SelectTrigger className="w-[140px]">
         <Languages className="w-4 h-4 mr-2" />
-        <SelectValue />
+        <SelectValue placeholder={localeNames[locale]}>
+          {localeNames[locale]}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {availableLocales.map((loc) => (
