@@ -18,6 +18,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { BalanceRecord, TransactionType } from '@/types/balance';
+import { supabase } from '@/lib/supabase';
 
 const TRANSACTION_TYPES: Record<
   TransactionType,

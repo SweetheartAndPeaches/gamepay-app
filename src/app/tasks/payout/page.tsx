@@ -5,6 +5,7 @@ import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useI18n } from '@/i18n/context';
 import { CreditCard, Clock, CheckCircle } from 'lucide-react';
 
 interface Task {
@@ -24,6 +25,7 @@ interface TaskGroup {
 }
 
 export default function PayoutTasksPage() {
+  const { t, formatCurrency } = useI18n();
   const [taskGroups, setTaskGroups] = useState<TaskGroup[]>([
     {
       range: '100-500',
@@ -46,106 +48,161 @@ export default function PayoutTasksPage() {
     },
   ]);
 
-  const handleClaimTask = async (taskId: string) => {
-    // TODO: 实现领取任务逻辑
-    console.log('Claim task:', taskId);
+  const handleClaim = (groupId: string, taskId: string) => {
+    setTaskGroups((prev) =>
+      prev.map((group) => {
+        if (group.range !== groupId) return group;
+
+        return {
+          ...group,
+          tasks: group.tasks.map((task) =>
+            task.id === taskId && task.status === 'pending'
+              ? { ...task, status: 'claimed' as const }
+              : task
+          ),
+        };
+      })
+    );
+  };
+
+  const handleComplete = (groupId: string, taskId: string) => {
+    setTaskGroups((prev) =>
+      prev.map((group) => {
+        if (group.range !== groupId) return group;
+
+        const updatedTasks = group.tasks.map((task) =>
+          task.id === taskId && task.status === 'claimed'
+            ? { ...task, status: 'completed' as const }
+            : task
+        );
+
+        const completed = updatedTasks.filter((t) => t.status === 'completed').length;
+
+        return {
+          ...group,
+          completed,
+          tasks: updatedTasks,
+        };
+      })
+    );
+  };
+
+  const getStatusBadge = (status: Task['status']) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline">{t('payout.status.pending')}</Badge>;
+      case 'claimed':
+        return <Badge variant="secondary">{t('payout.status.claimed')}</Badge>;
+      case 'completed':
+        return <Badge variant="default">{t('payout.status.completed')}</Badge>;
+    }
   };
 
   return (
-    <MainLayout>
-      <div className="p-4 space-y-6">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">代付任务</h2>
-          <p className="text-sm text-gray-600">
-            完成每日最低任务次数后方可进行代收任务
-          </p>
-        </div>
+    <MainLayout showBalance={false}>
+      <div className="p-4 space-y-4">
+        <h1 className="text-xl font-bold text-gray-900">{t('payout.title')}</h1>
 
-        {taskGroups.map((group) => {
-          const isCompleted = group.completed >= group.required;
-          const progress = (group.completed / group.required) * 100;
+        <Card className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+          <div className="flex items-center gap-3 mb-2">
+            <CreditCard className="w-8 h-8" />
+            <div>
+              <p className="text-sm opacity-90">{t('payout.totalTasks')}</p>
+              <p className="text-2xl font-bold">
+                {taskGroups.reduce((acc, g) => acc + g.required, 0)}
+              </p>
+            </div>
+          </div>
+          <p className="text-xs opacity-80">{t('payout.description')}</p>
+        </Card>
 
-          return (
-            <Card key={group.range} className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900">
-                    {group.range} 元
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    今日需完成 {group.required} 单，已完成 {group.completed} 单
-                  </p>
-                </div>
-                {isCompleted && (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
-                    已达标
-                  </Badge>
-                )}
+        {taskGroups.map((group) => (
+          <Card key={group.range} className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h2 className="font-semibold text-gray-900">
+                  {t('payout.taskRange')} {formatCurrency(group.range.split('-')[0])} - {formatCurrency(group.range.split('-')[1])}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {t('payout.progress', { current: group.completed, total: group.required })}
+                </p>
               </div>
+              <Badge
+                variant={group.completed >= group.required ? 'default' : 'secondary'}
+              >
+                {group.completed >= group.required ? t('payout.completed') : t('payout.inProgress')}
+              </Badge>
+            </div>
 
-              {/* 进度条 */}
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all"
-                  style={{ width: `${Math.min(progress, 100)}%` }}
-                />
-              </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all"
+                style={{
+                  width: `${(group.completed / group.required) * 100}%`,
+                }}
+              />
+            </div>
 
-              {/* 任务列表 */}
-              <div className="space-y-3">
-                {group.tasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-medium text-gray-900">
-                          {task.orderNo}
-                        </span>
-                        <Badge
-                          variant={
-                            task.status === 'completed'
-                              ? 'secondary'
-                              : task.status === 'claimed'
-                              ? 'outline'
-                              : 'default'
-                          }
-                        >
-                          {task.status === 'completed'
-                            ? '已完成'
-                            : task.status === 'claimed'
-                            ? '已领取'
-                            : '待领取'}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-gray-600">
-                        <span>金额: {task.amount} 元</span>
-                        <span>奖励: {task.reward} 元</span>
-                      </div>
+            <div className="space-y-3">
+              {group.tasks.map((task) => (
+                <Card key={task.id} className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        {t('payout.orderNo')}: {task.orderNo}
+                      </span>
                     </div>
-
-                    {task.status === 'pending' && (
-                      <Button
-                        size="sm"
-                        onClick={() => handleClaimTask(task.id)}
-                      >
-                        领取
-                      </Button>
-                    )}
+                    {getStatusBadge(task.status)}
                   </div>
-                ))}
 
-                {group.tasks.length === 0 && (
-                  <div className="text-center py-6 text-gray-500 text-sm">
-                    暂无可用任务
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <p className="text-xs text-gray-600">{t('payout.orderAmount')}</p>
+                      <p className="font-bold text-gray-900">{formatCurrency(task.amount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600">{t('payout.reward')}</p>
+                      <p className="font-bold text-green-600">
+                        {formatCurrency(task.reward)}
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
-            </Card>
-          );
-        })}
+
+                  <p className="text-xs text-gray-500 mb-3">
+                    {t('payout.expiryTime')}: {task.expiryTime}
+                  </p>
+
+                  {task.status === 'pending' && (
+                    <Button
+                      className="w-full"
+                      onClick={() => handleClaim(group.range, task.id)}
+                    >
+                      {t('payout.claimTask')}
+                    </Button>
+                  )}
+
+                  {task.status === 'claimed' && (
+                    <Button
+                      className="w-full"
+                      variant="secondary"
+                      onClick={() => handleComplete(group.range, task.id)}
+                    >
+                      {t('payout.markCompleted')}
+                    </Button>
+                  )}
+
+                  {task.status === 'completed' && (
+                    <div className="flex items-center justify-center gap-2 text-green-600">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="text-sm font-medium">{t('payout.completed')}</span>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </Card>
+        ))}
       </div>
     </MainLayout>
   );

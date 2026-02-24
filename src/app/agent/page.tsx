@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useI18n } from '@/i18n/context';
 import {
   Users,
   TrendingUp,
@@ -30,6 +31,7 @@ interface Commission {
 }
 
 export default function AgentPage() {
+  const { t, formatCurrency } = useI18n();
   const [agentData] = useState({
     isActive: true,
     totalReferrals: 15,
@@ -70,20 +72,20 @@ export default function AgentPage() {
                 <Users className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">代理已激活</h2>
-                <p className="text-sm text-gray-600">享受佣金收益</p>
+                <h2 className="text-lg font-bold text-gray-900">{t('agent.activated')}</h2>
+                <p className="text-sm text-gray-600">{t('agent.enjoyCommission')}</p>
               </div>
             </div>
           ) : (
             <div className="text-center py-6">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-3" />
               <h2 className="text-lg font-bold text-gray-900 mb-1">
-                代理未激活
+                {t('agent.notActivated')}
               </h2>
               <p className="text-sm text-gray-600 mb-4">
-                推荐满 5 人即可成为代理
+                {t('agent.activationRequirement')}
               </p>
-              <Button variant="outline">去推广</Button>
+              <Button variant="outline">{t('agent.goPromote')}</Button>
             </div>
           )}
 
@@ -93,19 +95,19 @@ export default function AgentPage() {
                 <p className="text-2xl font-bold text-gray-900">
                   {agentData.totalReferrals}
                 </p>
-                <p className="text-sm text-gray-600">下级人数</p>
+                <p className="text-sm text-gray-600">{t('agent.referralCount')}</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-green-600">
-                  {agentData.todayCommission}
+                  {formatCurrency(agentData.todayCommission)}
                 </p>
-                <p className="text-sm text-gray-600">今日佣金</p>
+                <p className="text-sm text-gray-600">{t('agent.todayCommission')}</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-gray-900">
-                  {agentData.totalCommission}
+                  {formatCurrency(agentData.totalCommission)}
                 </p>
-                <p className="text-sm text-gray-600">累计佣金</p>
+                <p className="text-sm text-gray-600">{t('agent.totalCommission')}</p>
               </div>
             </div>
           )}
@@ -114,7 +116,7 @@ export default function AgentPage() {
         {/* 推广链接和二维码 */}
         {agentData.isActive && (
           <Card className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">推广方式</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">{t('agent.promotionMethods')}</h3>
             <div className="grid grid-cols-2 gap-3">
               <Button
                 variant="outline"
@@ -122,7 +124,7 @@ export default function AgentPage() {
                 onClick={handleCopyLink}
               >
                 <LinkIcon className="w-6 h-6" />
-                <span className="text-sm">复制链接</span>
+                <span className="text-sm">{t('agent.copyLink')}</span>
               </Button>
               <Button
                 variant="outline"
@@ -130,7 +132,7 @@ export default function AgentPage() {
                 onClick={handleShare}
               >
                 <Share2 className="w-6 h-6" />
-                <span className="text-sm">分享二维码</span>
+                <span className="text-sm">{t('agent.shareQRCode')}</span>
               </Button>
             </div>
           </Card>
@@ -139,8 +141,8 @@ export default function AgentPage() {
         {/* Tabs */}
         <Tabs defaultValue="users" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="users">下级用户</TabsTrigger>
-            <TabsTrigger value="commissions">佣金明细</TabsTrigger>
+            <TabsTrigger value="users">{t('agent.subUsers')}</TabsTrigger>
+            <TabsTrigger value="commissions">{t('agent.commissionDetails')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-3 mt-4">
@@ -150,12 +152,12 @@ export default function AgentPage() {
                   <div>
                     <p className="font-medium text-gray-900">{user.phone}</p>
                     <p className="text-sm text-gray-600">
-                      注册时间：{user.registeredAt}
+                      {t('agent.registrationDate')}: {user.registeredAt}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-gray-900">{user.taskCount}</p>
-                    <p className="text-sm text-gray-600">完成任务</p>
+                    <p className="text-sm text-gray-600">{t('agent.completedTasks')}</p>
                   </div>
                 </div>
               </Card>
@@ -163,7 +165,7 @@ export default function AgentPage() {
 
             {subUsers.length === 0 && (
               <Card className="p-6 text-center text-gray-500 text-sm">
-                暂无下级用户
+                {t('agent.noSubUsers')}
               </Card>
             )}
           </TabsContent>
@@ -176,10 +178,10 @@ export default function AgentPage() {
                     <DollarSign className="w-5 h-5 text-green-600" />
                     <div>
                       <p className="font-medium text-gray-900">
-                        {commission.amount} 元
+                        {formatCurrency(commission.amount)}
                       </p>
                       <p className="text-sm text-gray-600">
-                        来自：{commission.fromUser}
+                        {t('agent.from')}: {commission.fromUser}
                       </p>
                     </div>
                   </div>
@@ -189,7 +191,7 @@ export default function AgentPage() {
                         commission.type === 'payout' ? 'default' : 'secondary'
                       }
                     >
-                      {commission.type === 'payout' ? '代付' : '代收'}
+                      {commission.type === 'payout' ? t('agent.payout') : t('agent.payin')}
                     </Badge>
                     <p className="text-xs text-gray-500 mt-1">
                       {commission.createdAt}
@@ -201,7 +203,7 @@ export default function AgentPage() {
 
             {commissions.length === 0 && (
               <Card className="p-6 text-center text-gray-500 text-sm">
-                暂无佣金记录
+                {t('agent.noCommissions')}
               </Card>
             )}
           </TabsContent>
