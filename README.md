@@ -243,18 +243,39 @@ COZE_BUCKET_NAME=your-bucket-name
 
 ## 部署说明
 
+### 本地开发
 项目已配置为在端口 5000 运行，支持 HMR（热模块替换）。
 
-### 开发环境
 ```bash
 coze dev
 ```
 
-### 生产环境
+### 生产环境（本地）
 ```bash
 coze build
 coze start
 ```
+
+### Vercel 部署
+项目已配置好 Vercel 部署，详细步骤请查看 [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
+
+**快速部署步骤：**
+
+1. **获取 Supabase 配置**
+   - 访问：https://supabase.com/dashboard/project/eplavqbtysmknzdcbgbq/settings/api
+   - 复制 Project URL 和 anon public key
+
+2. **在 Vercel 配置环境变量**
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://eplavqbtysmknzdcbgbq.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   DATABASE_URL=postgresql://postgres:7474+CxZ.52@db.eplavqbtysmknzdcbgbq.supabase.co:5432/postgres
+   JWT_SECRET=生成一个强密码
+   ```
+
+3. **推送到 GitHub 并在 Vercel 导入项目**
+
+详细配置请参考 [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
 
 ## 注意事项
 
