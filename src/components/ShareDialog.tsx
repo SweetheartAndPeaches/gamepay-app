@@ -32,7 +32,15 @@ export default function ShareDialog({
   const { t } = useI18n();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
+  const [supportsShare, setSupportsShare] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // 检查是否支持 Web Share API
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && 'share' in navigator) {
+      setSupportsShare(true);
+    }
+  }, []);
 
   // 生成二维码
   useEffect(() => {
@@ -81,7 +89,7 @@ export default function ShareDialog({
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
+    if (supportsShare && navigator.share) {
       try {
         await navigator.share({
           title: title || t('share.defaultTitle'),
@@ -151,7 +159,7 @@ export default function ShareDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          {navigator.share && (
+          {supportsShare && (
             <Button
               onClick={handleShare}
               variant="default"
