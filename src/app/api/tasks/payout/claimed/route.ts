@@ -25,10 +25,10 @@ export async function GET(request: NextRequest) {
 
     // 获取用户已领取的任务
     const { data: tasks, error: tasksError } = await client
-      .from('tasks')
+      .from('orders')
       .select('*')
-      .eq('claimed_by', payload.userId)
-      .eq('task_type', 'payout')
+      .eq('user_id', payload.userId)
+      .eq('type', 'payout')
       .in('status', ['claimed', 'completed'])
       .order('created_at', { ascending: false })
       .limit(50);

@@ -18,16 +18,12 @@ interface Order {
   id: string;
   order_no: string;
   amount: number;
-  reward_ratio: number;
+  commission: number;
   status: 'pending' | 'claimed' | 'completed' | 'expired' | 'cancelled';
-  payment_info: {
-    payment_method: string;
-    payment_account: string;
-    account_name: string;
-    account_bank: string;
-  };
-  claimed_by: string | null;
-  expired_at: string;
+  payment_method: string | null;
+  payment_account: string | null;
+  payment_screenshot_url: string | null;
+  expires_at: string;
   created_at: string;
 }
 
@@ -36,36 +32,6 @@ interface ApiResponse {
   message: string;
   data?: any;
 }
-
-// 计算佣金
-const calculateCommission = (amount: number, rewardRatio: number): number => {
-  return amount * rewardRatio;
-};
-
-// 提取支付方式
-const extractPaymentMethod = (paymentInfo: Order['payment_info']): string => {
-  if (!paymentInfo) return '-';
-  const methodMap: Record<string, string> = {
-    wechat: '微信',
-    alipay: '支付宝',
-    bank: '银行卡',
-    paypal: 'PayPal',
-    venmo: 'Venmo',
-    cash_app: 'Cash App',
-    zelle: 'Zelle',
-    stripe: 'Stripe',
-    wise: 'Wise',
-    payoneer: 'Payoneer',
-    swift: 'SWIFT',
-  };
-  return methodMap[paymentInfo.payment_method] || paymentInfo.payment_method;
-};
-
-// 提取收款账号
-const extractPaymentAccount = (paymentInfo: Order['payment_info']): string => {
-  if (!paymentInfo) return '-';
-  return paymentInfo.payment_account;
-};
 
 export default function PayoutTasksPage() {
   const { t, formatCurrency } = useI18n();
@@ -183,9 +149,27 @@ export default function PayoutTasksPage() {
     }
   };
 
-  const isExpiringSoon = (expiredAt: string) => {
+  const formatPaymentMethod = (method: string | null) => {
+    if (!method) return '-';
+    const methodMap: Record<string, string> = {
+      wechat: '微信',
+      alipay: '支付宝',
+      bank: '银行卡',
+      paypal: 'PayPal',
+      venmo: 'Venmo',
+      cash_app: 'Cash App',
+      zelle: 'Zelle',
+      stripe: 'Stripe',
+      wise: 'Wise',
+      payoneer: 'Payoneer',
+      swift: 'SWIFT',
+    };
+    return methodMap[method] || method;
+  };
+
+  const isExpiringSoon = (expiresAt: string) => {
     const now = new Date();
-    const expires = new Date(expiredAt);
+    const expires = new Date(expiresAt);
     const diff = expires.getTime() - now.getTime();
     return diff > 0 && diff < 5 * 60 * 1000; // 5 分钟内
   };
@@ -276,7 +260,7 @@ export default function PayoutTasksPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {isExpiringSoon(order.expired_at) && (
+                      {isExpiringSoon(order.expires_at) && (
                         <Badge variant="destructive" className="text-xs">
                           即将过期
                         </Badge>
@@ -295,13 +279,13 @@ export default function PayoutTasksPage() {
                     <div>
                       <p className="text-xs text-gray-600">任务奖励</p>
                       <p className="font-bold text-green-600">
-                        +{formatCurrency(calculateCommission(order.amount, order.reward_ratio).toString())}
+                        +{formatCurrency(order.commission)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600">支付方式</p>
                       <p className="font-medium text-gray-900">
-                        {extractPaymentMethod(order.payment_info)}
+                        {formatPaymentMethod(order.payment_method)}
                       </p>
                     </div>
                   </div>
@@ -362,19 +346,19 @@ export default function PayoutTasksPage() {
                     <div>
                       <p className="text-xs text-gray-600">任务奖励</p>
                       <p className="font-bold text-green-600">
-                        +{formatCurrency(calculateCommission(order.amount, order.reward_ratio).toString())}
+                        +{formatCurrency(order.commission)}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600">支付方式</p>
                       <p className="font-medium text-gray-900">
-                        {extractPaymentMethod(order.payment_info)}
+                        {formatPaymentMethod(order.payment_method)}
                       </p>
                     </div>
                   </div>
 
                   <div className="text-sm text-gray-600 mb-3">
-                    <p>收款账号：{extractPaymentAccount(order.payment_info)}</p>
+                    <p>收款账号：{order.payment_account}</p>
                   </div>
 
                   <Button
