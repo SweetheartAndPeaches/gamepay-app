@@ -215,6 +215,7 @@ CREATE TRIGGER update_system_settings_updated_at
 INSERT INTO system_settings (key, value, description) VALUES
   ('payout.min_task_count', '5', '每日最低代付任务次数'),
   ('payout.reward_rate', '0.01', '代付任务奖励率（1%）'),
+  ('payin.enabled', 'true', '代收任务是否开启'),
   ('payin.reward_rate', '0.015', '代收任务奖励率（1.5%）'),
   ('withdrawal.min_amount', '100', '最低提现金额'),
   ('withdrawal.fee_rate', '0.005', '提现手续费率（0.5%）'),
