@@ -42,11 +42,34 @@ export default function PayoutTasksPage() {
   const [isCompleting, setIsCompleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [canClaim, setCanClaim] = useState(true);
+  const [userBalance, setUserBalance] = useState(0);
 
   // 获取 token
   const getToken = () => {
     if (typeof window === 'undefined') return '';
     return localStorage.getItem('token') || '';
+  };
+
+  // 获取用户余额
+  const fetchUserBalance = async () => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const response = await fetch('/api/user/info', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data: ApiResponse = await response.json();
+
+      if (data.success) {
+        setUserBalance(parseFloat(data.data.user.balance || '0'));
+      }
+    } catch (error) {
+      console.error('Fetch user balance error:', error);
+    }
   };
 
   // 获取可领取任务列表
@@ -251,6 +274,7 @@ export default function PayoutTasksPage() {
 
   useEffect(() => {
     fetchAvailableTasks();
+    fetchUserBalance();
   }, []);
 
   useEffect(() => {
@@ -282,9 +306,9 @@ export default function PayoutTasksPage() {
           <div className="flex items-center gap-3 mb-2">
             <CreditCard className="w-8 h-8" />
             <div>
-              <p className="text-sm opacity-90">代付任务</p>
+              <p className="text-sm opacity-90">您的可用余额</p>
               <p className="text-2xl font-bold">
-                {availableTasks.length} 个可领取
+                ¥{userBalance.toFixed(2)}
               </p>
             </div>
           </div>
