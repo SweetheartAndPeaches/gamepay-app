@@ -137,15 +137,15 @@ export default function PayoutTasksPage() {
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline">待领取</Badge>;
+        return <Badge variant="outline">{t('tasks.payout.status.pending')}</Badge>;
       case 'claimed':
-        return <Badge variant="secondary">进行中</Badge>;
+        return <Badge variant="secondary">{t('tasks.payout.inProgress')}</Badge>;
       case 'completed':
-        return <Badge variant="default">已完成</Badge>;
+        return <Badge variant="default">{t('tasks.payout.completed')}</Badge>;
       case 'expired':
-        return <Badge variant="destructive">已过期</Badge>;
+        return <Badge variant="destructive">{t('common.error')}</Badge>;
       case 'cancelled':
-        return <Badge variant="secondary">已取消</Badge>;
+        return <Badge variant="secondary">{t('common.cancel')}</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -153,20 +153,7 @@ export default function PayoutTasksPage() {
 
   const formatPaymentMethod = (method: string | null) => {
     if (!method) return '-';
-    const methodMap: Record<string, string> = {
-      wechat: '微信',
-      alipay: '支付宝',
-      bank: '银行卡',
-      paypal: 'PayPal',
-      venmo: 'Venmo',
-      cash_app: 'Cash App',
-      zelle: 'Zelle',
-      stripe: 'Stripe',
-      wise: 'Wise',
-      payoneer: 'Payoneer',
-      swift: 'SWIFT',
-    };
-    return methodMap[method] || method;
+    return t(`tasks.payout.paymentMethods.${method}`);
   };
 
   const isExpiringSoon = (expiresAt: string) => {
@@ -203,8 +190,8 @@ export default function PayoutTasksPage() {
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6" />
               <div>
-                <p className="font-semibold">您有未完成的任务</p>
-                <p className="text-sm opacity-90">请先完成当前任务后再领取新任务</p>
+                <p className="font-semibold">{t('tasks.payout.youHaveUnfinishedTask')}</p>
+                <p className="text-sm opacity-90">{t('tasks.payout.pleaseCompleteFirst')}</p>
               </div>
             </div>
           </Card>
@@ -215,41 +202,41 @@ export default function PayoutTasksPage() {
           <div className="flex items-center gap-3 mb-2">
             <Wallet className="w-8 h-8" />
             <div>
-              <p className="text-sm opacity-90">您的可用余额</p>
+              <p className="text-sm opacity-90">{t('tasks.payout.yourBalance')}</p>
               <p className="text-2xl font-bold">
                 {formatCurrency(user?.balance?.toString() || '0')}
               </p>
             </div>
           </div>
           <p className="text-xs opacity-80">
-            完成代付任务赚取手续费奖励
+            {t('tasks.payout.completePayoutTasks')}
           </p>
         </Card>
 
         {/* 任务 Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="hall">任务大厅</TabsTrigger>
-            <TabsTrigger value="claimed">已领取任务</TabsTrigger>
+            <TabsTrigger value="hall">{t('tasks.payout.hall')}</TabsTrigger>
+            <TabsTrigger value="claimed">{t('tasks.payout.claimedTasks')}</TabsTrigger>
           </TabsList>
 
           {/* 任务大厅 */}
           <TabsContent value="hall" className="space-y-3 mt-4">
             {loading ? (
               <div className="text-center py-8 text-gray-500">
-                加载中...
+                {t('common.loading')}
               </div>
             ) : !canClaim ? (
               <div className="text-center py-8">
                 <AlertCircle className="w-12 h-12 mx-auto mb-3 text-orange-500" />
-                <p className="text-gray-600 mb-3">您当前有未完成的任务</p>
+                <p className="text-gray-600 mb-3">{t('tasks.payout.youHaveUnfinishedTask')}</p>
                 <Button onClick={() => setActiveTab('claimed')}>
-                  查看已领取任务
+                  {t('tasks.payout.viewClaimedTasks')}
                 </Button>
               </div>
             ) : availableTasks.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                暂无可用任务
+                {t('tasks.payout.noTasks')}
               </div>
             ) : (
               availableTasks.map((order) => (
@@ -264,7 +251,7 @@ export default function PayoutTasksPage() {
                     <div className="flex items-center gap-2">
                       {isExpiringSoon(order.expires_at) && (
                         <Badge variant="destructive" className="text-xs">
-                          即将过期
+                          {t('tasks.payout.expiringSoon')}
                         </Badge>
                       )}
                       {getStatusBadge(order.status)}
@@ -273,19 +260,19 @@ export default function PayoutTasksPage() {
 
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     <div>
-                      <p className="text-xs text-gray-600">代付金额</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.orderAmount')}</p>
                       <p className="font-bold text-gray-900">
                         {formatCurrency(order.amount)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">任务奖励</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.reward')}</p>
                       <p className="font-bold text-green-600">
                         +{formatCurrency(order.commission)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">支付方式</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.paymentMethod')}</p>
                       <p className="font-medium text-gray-900">
                         {formatPaymentMethod(order.payment_method)}
                       </p>
@@ -297,14 +284,14 @@ export default function PayoutTasksPage() {
                       className="flex-1"
                       onClick={() => setSelectedOrder(order)}
                     >
-                      查看详情
+                      {t('tasks.payout.viewDetails')}
                     </Button>
                     <Button
                       variant="outline"
                       onClick={() => handleClaim(order.id)}
                       disabled={isClaiming}
                     >
-                      {isClaiming ? '领取中...' : '领取'}
+                      {isClaiming ? t('tasks.payout.submitting') : t('tasks.payout.claim')}
                     </Button>
                   </div>
                 </Card>
@@ -316,13 +303,13 @@ export default function PayoutTasksPage() {
           <TabsContent value="claimed" className="space-y-3 mt-4">
             {loading ? (
               <div className="text-center py-8 text-gray-500">
-                加载中...
+                {t('common.loading')}
               </div>
             ) : claimedTasks.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <p className="mb-4">您还没有领取任何任务</p>
+                <p className="mb-4">{t('tasks.payout.noClaimedTasks')}</p>
                 <Button onClick={() => setActiveTab('hall')}>
-                  去任务大厅看看
+                  {t('tasks.payout.goToHall')}
                 </Button>
               </div>
             ) : (
@@ -340,19 +327,19 @@ export default function PayoutTasksPage() {
 
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     <div>
-                      <p className="text-xs text-gray-600">代付金额</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.orderAmount')}</p>
                       <p className="font-bold text-gray-900">
                         {formatCurrency(order.amount)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">任务奖励</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.reward')}</p>
                       <p className="font-bold text-green-600">
                         +{formatCurrency(order.commission)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-600">支付方式</p>
+                      <p className="text-xs text-gray-600">{t('tasks.payout.paymentMethod')}</p>
                       <p className="font-medium text-gray-900">
                         {formatPaymentMethod(order.payment_method)}
                       </p>
@@ -360,14 +347,14 @@ export default function PayoutTasksPage() {
                   </div>
 
                   <div className="text-sm text-gray-600 mb-3">
-                    <p>收款账号：{order.payment_account}</p>
+                    <p>{t('tasks.payout.receiverAccount')}: {order.payment_account}</p>
                   </div>
 
                   <Button
                     className="w-full"
                     onClick={() => setSelectedOrder(order)}
                   >
-                    查看详情并继续
+                    {t('tasks.payout.viewDetailsContinue')}
                   </Button>
                 </Card>
               ))
