@@ -293,6 +293,10 @@ export default function PayoutTasksPage() {
 
       if (data.success) {
         toast.success('领取任务成功');
+        // 设置有未完成任务
+        setCanClaim(false);
+        // 设置当前任务
+        setActiveTask(data.data);
         // 先刷新已领取任务列表
         await fetchClaimedTasks();
         // 再切换到已领取标签页
@@ -348,6 +352,13 @@ export default function PayoutTasksPage() {
       fetchClaimedTasks();
     }
   }, [activeTab, isAuthenticated]);
+
+  // 切换到任务大厅时重新检查任务状态
+  useEffect(() => {
+    if (activeTab === 'hall' && isAuthenticated) {
+      fetchAvailableTasks();
+    }
+  }, [activeTab]);
 
   // 金额范围改变时重新加载任务列表
   useEffect(() => {
