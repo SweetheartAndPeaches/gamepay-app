@@ -104,7 +104,7 @@ export default function PayoutTasksPage() {
     frozenBalance: user?.frozenBalance || 0,
     totalIncome: claimedTasks
       .filter((task) => task.status === 'completed')
-      .reduce((sum, task) => sum + task.commission, 0),
+      .reduce((sum, task) => sum + task.amount + task.commission, 0),
     totalOutcome: 0, // 暂无支出数据
   };
 
@@ -637,7 +637,7 @@ export default function PayoutTasksPage() {
                   const data: ApiResponse = await response.json();
 
                   if (data.success) {
-                    toast.success(`任务完成！获得 ${formatCurrency(data.data.reward)} 奖励`);
+                    toast.success(`任务完成！订单金额 ${formatCurrency(data.data.orderAmount)} + 奖励 ${formatCurrency(data.data.commission)} = 总计 ${formatCurrency(data.data.totalReward)}`);
                   } else {
                     toast.error(data.message || '完成任务失败');
                   }

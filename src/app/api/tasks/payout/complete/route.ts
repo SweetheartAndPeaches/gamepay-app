@@ -77,8 +77,10 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    // 计算奖励
-    const reward = parseFloat(order.commission.toString());
+    // 计算奖励：订单金额 + 奖励金额
+    const orderAmount = parseFloat(order.amount.toString());
+    const commission = parseFloat(order.commission.toString());
+    const totalReward = orderAmount + commission;
 
     // 获取用户当前余额
     const user = await supabaseQueryOne(
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newBalance = parseFloat(user.balance.toString()) + reward;
+    const newBalance = parseFloat(user.balance.toString()) + totalReward;
 
     // 更新用户余额
     await supabaseUpdate(
@@ -112,13 +114,13 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    // 记录余额变动
+    // 记录余额变动（包含订单金额和奖励）
     await supabaseInsert('balance_records', {
       user_id: payload.userId,
       type: 'task_reward',
-      amount: reward,
+      amount: totalReward,
       balance_after: newBalance,
-      description: `完成代付任务奖励（订单号：${order.order_no}）`,
+      description: `完成代付任务（订单号：${order.order_no}）- 订单金额：${orderAmount} 元，奖励：${commission} 元`,
       related_order_id: order.id,
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
@@ -136,10 +138,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: '任务完成，奖励已发放',
+      message: '任务完成，订单金额和奖励已发放',
       data: {
         order: updatedOrder,
-        reward,
+        orderAmount,
+        commission,
+        totalReward,
         newBalance,
       },
     });
