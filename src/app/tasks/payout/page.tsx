@@ -386,10 +386,64 @@ export default function PayoutTasksPage() {
               }
             }}
             onComplete={async (orderId, screenshotUrl) => {
-              // 这里可以实现上传凭证和完成任务的逻辑
-              toast.success('操作成功');
-              setSelectedOrder(null);
-              await fetchClaimedTasks();
+              try {
+                setIsClaiming(true);
+
+                // 检查是否已有支付凭证
+                if (selectedOrder.payment_screenshot_url) {
+                  // 已有凭证，调用完成任务 API
+                  const response = await authFetch('/api/tasks/payout/complete', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ orderId }),
+                  });
+
+                  const data: ApiResponse = await response.json();
+
+                  if (data.success) {
+                    toast.success(`任务完成！获得 ${formatCurrency(data.data.reward)} 奖励`);
+                  } else {
+                    toast.error(data.message || '完成任务失败');
+                  }
+                } else {
+                  // 没有凭证，调用上传凭证 API
+                  if (!screenshotUrl) {
+                    toast.error('请先上传支付凭证');
+                    return;
+                  }
+
+                  const response = await authFetch('/api/tasks/payout/upload-proof', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      orderId,
+                      screenshotUrl,
+                    }),
+                  });
+
+                  const data: ApiResponse = await response.json();
+
+                  if (data.success) {
+                    toast.success('支付凭证上传成功，等待审核');
+                    // 刷新已领取任务列表
+                    await fetchClaimedTasks();
+                    // 重新设置选中订单以更新状态
+                    const updatedOrder = data.data;
+                    setSelectedOrder(updatedOrder);
+                  } else {
+                    toast.error(data.message || '上传支付凭证失败');
+                  }
+                }
+              } catch (error) {
+                console.error('操作失败:', error);
+                toast.error('操作失败，请稍后重试');
+              } finally {
+                setIsClaiming(false);
+              }
             }}
             isCompleting={isClaiming}
           />
