@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useI18n } from '@/i18n/context';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -18,7 +20,17 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { BalanceRecord, TransactionType } from '@/types/balance';
-import { supabase } from '@/lib/supabase';
+
+const authFetch = async (url: string, options: RequestInit = {}) => {
+  const token = localStorage.getItem('token');
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+};
 
 const TRANSACTION_TYPES: Record<
   TransactionType,
@@ -71,6 +83,7 @@ type TabType = 'all' | 'income' | 'outcome';
 
 export default function BalanceHistoryPage() {
   const { t, formatCurrency } = useI18n();
+  const { user } = useAuth();
   const [records, setRecords] = useState<BalanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('all');
@@ -78,103 +91,41 @@ export default function BalanceHistoryPage() {
   const [statistics, setStatistics] = useState({
     totalIncome: 0,
     totalOutcome: 0,
-    availableBalance: 0,
-    frozenBalance: 0,
+    availableBalance: user?.balance || 0,
+    frozenBalance: user?.frozenBalance || 0,
   });
 
   // 获取余额记录
   const fetchRecords = async () => {
     try {
       setLoading(true);
-      const { data: user } = await supabase.auth.getUser();
-      if (!user.user) {
-        return;
+
+      const response = await authFetch('/api/balance/records?limit=50');
+      const data = await response.json();
+
+      if (data.success) {
+        setRecords(data.data);
+
+        // 计算统计数据
+        const totalIncome = data.data
+          .filter((r: BalanceRecord) => TRANSACTION_TYPES[r.type].isIncome)
+          .reduce((sum: number, r: BalanceRecord) => sum + r.amount, 0);
+        const totalOutcome = data.data
+          .filter((r: BalanceRecord) => !TRANSACTION_TYPES[r.type].isIncome)
+          .reduce((sum: number, r: BalanceRecord) => sum + Math.abs(r.amount), 0);
+
+        setStatistics({
+          totalIncome,
+          totalOutcome,
+          availableBalance: user?.balance || 0,
+          frozenBalance: user?.frozenBalance || 0,
+        });
+      } else {
+        toast.error(data.message || '获取余额记录失败');
       }
-
-      // TODO: 实际数据获取逻辑
-      // const { data, error } = await supabase
-      //   .from('balance_records')
-      //   .select('*')
-      //   .eq('userId', user.user.id)
-      //   .order('createdAt', { ascending: false })
-      //   .limit(50);
-
-      // 模拟数据
-      const mockRecords: BalanceRecord[] = [
-        {
-          id: '1',
-          userId: user.user.id,
-          type: 'task_reward',
-          amount: 2.40,
-          balanceAfter: 1250.40,
-          description: '代付任务奖励 - ORD003',
-          relatedOrderId: 'ORD003',
-          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-        },
-        {
-          id: '2',
-          userId: user.user.id,
-          type: 'commission',
-          amount: 15.00,
-          balanceAfter: 1248.00,
-          description: '代理佣金 - 用户 138****1234',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-        },
-        {
-          id: '3',
-          userId: user.user.id,
-          type: 'withdrawal',
-          amount: -500.00,
-          balanceAfter: 1233.00,
-          description: '提现申请 - 银行卡',
-          relatedOrderId: 'WD001',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-        },
-        {
-          id: '4',
-          userId: user.user.id,
-          type: 'freeze',
-          amount: -200.00,
-          balanceAfter: 1733.00,
-          description: '任务冻结 - ORD005',
-          relatedOrderId: 'ORD005',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-        },
-        {
-          id: '5',
-          userId: user.user.id,
-          type: 'unfreeze',
-          amount: 200.00,
-          balanceAfter: 1933.00,
-          description: '任务解冻 - ORD005',
-          relatedOrderId: 'ORD005',
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-          updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-        },
-      ];
-
-      setRecords(mockRecords);
-
-      // 计算统计数据
-      const totalIncome = mockRecords
-        .filter((r) => TRANSACTION_TYPES[r.type].isIncome)
-        .reduce((sum, r) => sum + r.amount, 0);
-      const totalOutcome = mockRecords
-        .filter((r) => !TRANSACTION_TYPES[r.type].isIncome)
-        .reduce((sum, r) => sum + Math.abs(r.amount), 0);
-
-      setStatistics({
-        totalIncome,
-        totalOutcome,
-        availableBalance: 1250.40,
-        frozenBalance: 0,
-      });
     } catch (error) {
       console.error('Failed to fetch balance records:', error);
+      toast.error('获取余额记录失败');
     } finally {
       setLoading(false);
     }
