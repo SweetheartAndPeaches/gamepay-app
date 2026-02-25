@@ -74,31 +74,22 @@ export async function supabaseQuery<T = any>(
     Object.entries(options.filter).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (typeof value === 'string' && value.startsWith('neq.')) {
-          // Not equal: neq.value
           queryParams.append(`${key}`, `neq.${value.substring(4)}`);
         } else if (typeof value === 'string' && value.startsWith('gt.')) {
-          // Greater than: gt.value
           queryParams.append(`${key}`, `gt.${value.substring(3)}`);
         } else if (typeof value === 'string' && value.startsWith('lt.')) {
-          // Less than: lt.value
           queryParams.append(`${key}`, `lt.${value.substring(3)}`);
         } else if (typeof value === 'string' && value.startsWith('gte.')) {
-          // Greater than or equal: gte.value
           queryParams.append(`${key}`, `gte.${value.substring(4)}`);
         } else if (typeof value === 'string' && value.startsWith('lte.')) {
-          // Less than or equal: lte.value
           queryParams.append(`${key}`, `lte.${value.substring(4)}`);
         } else if (typeof value === 'string' && value.startsWith('like.')) {
-          // Like: like.value
           queryParams.append(`${key}`, `like.${value.substring(5)}`);
         } else if (typeof value === 'string' && value.startsWith('in.')) {
-          // In: in.value1,value2,value3
           queryParams.append(`${key}`, `in.(${value.substring(3)})`);
         } else if (Array.isArray(value)) {
-          // IN clause
           queryParams.append(`${key}`, `in.(${value.join(',')})`);
         } else {
-          // Equals
           queryParams.append(`${key}`, `eq.${value}`);
         }
       }
@@ -212,6 +203,7 @@ export async function supabaseUpdate<T = any>(
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
       'Accept-Profile': 'public',
+      'Content-Profile': 'public',
     },
     body: JSON.stringify(data),
   });
