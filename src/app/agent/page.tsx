@@ -11,8 +11,6 @@ import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Users,
-  TrendingUp,
-  Link as LinkIcon,
   Share2,
   DollarSign,
   Gift,
@@ -58,17 +56,6 @@ export default function AgentPage() {
     { id: '2', amount: '0.30', type: 'payin', fromUser: '138****5678', createdAt: '2024-01-01' },
     { id: '3', amount: '0.45', type: 'payout', fromUser: '137****9012', createdAt: '2024-01-01' },
   ]);
-
-  const handleCopyLink = async () => {
-    // 生成推广链接并复制
-    const inviteUrl = `${window.location.origin}?inviteCode=${agentData.inviteCode}&type=agent`;
-    try {
-      await navigator.clipboard.writeText(inviteUrl);
-      alert(t('agent.linkCopied'));
-    } catch (error) {
-      console.error('Failed to copy link:', error);
-    }
-  };
 
   const handleShare = () => {
     // 打开分享对话框，使用用户邀请码
@@ -153,31 +140,6 @@ export default function AgentPage() {
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 {t('profile.shareInvite')}
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* 推广链接和二维码 */}
-        {agentData.isActive && (
-          <Card className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-3">{t('agent.promotionMethods')}</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                className="flex flex-col items-center gap-2 h-auto py-4"
-                onClick={handleCopyLink}
-              >
-                <LinkIcon className="w-6 h-6" />
-                <span className="text-sm">{t('agent.copyLink')}</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="flex flex-col items-center gap-2 h-auto py-4"
-                onClick={handleShare}
-              >
-                <Share2 className="w-6 h-6" />
-                <span className="text-sm">{t('agent.shareQRCode')}</span>
               </Button>
             </div>
           </Card>
