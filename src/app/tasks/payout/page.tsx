@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
@@ -52,6 +52,18 @@ export default function PayoutTasksPage() {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const limit = 10;
+  
+  // 追踪已加载的订单 ID，避免重复
+  const [loadedOrderIds, setLoadedOrderIds] = useState<Set<string>>(new Set());
+  
+  // 使用 ref 避免重复加载请求和存储当前 offset
+  const isLoadingRef = useRef(false);
+  const offsetRef = useRef(offset);
+  
+  // 同步 offset 到 ref
+  useEffect(() => {
+    offsetRef.current = offset;
+  }, [offset]);
 
   // 统计数据
   const statistics = {
@@ -77,9 +89,14 @@ export default function PayoutTasksPage() {
   // 获取可领取任务列表
   const fetchAvailableTasks = async (loadMore = false) => {
     try {
+      // 防止重复请求
+      if (isLoadingRef.current) return;
+      isLoadingRef.current = true;
+
       if (!loadMore) {
         setLoading(true);
         setOffset(0);
+        setLoadedOrderIds(new Set()); // 重置已加载的订单 ID
       } else {
         setLoadingMore(true);
       }
@@ -93,11 +110,25 @@ export default function PayoutTasksPage() {
         setCanClaim(data.data.canClaim);
 
         if (loadMore) {
-          // 加载更多：追加数据
-          setAvailableTasks(prev => [...prev, ...(data.data.tasks || [])]);
+          // 加载更多：追加数据，但过滤掉重复的订单
+          const newTasks = (data.data.tasks || []).filter((task: Order) => 
+            !loadedOrderIds.has(task.id)
+          );
+          
+          // 更新已加载的订单 ID 集合
+          setLoadedOrderIds(prev => {
+            const newSet = new Set(prev);
+            newTasks.forEach((task: Order) => newSet.add(task.id));
+            return newSet;
+          });
+          
+          // 只追加新的订单
+          setAvailableTasks(prev => [...prev, ...newTasks]);
         } else {
           // 首次加载：替换数据
-          setAvailableTasks(data.data.tasks || []);
+          const tasks = data.data.tasks || [];
+          setLoadedOrderIds(new Set(tasks.map((t: Order) => t.id)));
+          setAvailableTasks(tasks);
         }
 
         setHasMore(data.data.hasMore || false);
@@ -115,6 +146,7 @@ export default function PayoutTasksPage() {
       console.error('Fetch available tasks error:', error);
       toast.error('获取任务列表失败');
     } finally {
+      isLoadingRef.current = false;
       if (!loadMore) {
         setLoading(false);
       } else {
@@ -123,15 +155,31 @@ export default function PayoutTasksPage() {
     }
   };
 
-  // 加载更多任务
-  const handleLoadMore = () => {
-    if (loadingMore || !hasMore) return;
-    const newOffset = offset + limit;
-    setOffset(newOffset);
-    fetchAvailableTasks(true);
-  };
+  // 滚动监听 - 实现无限滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      // 只在任务大厅标签页中启用无限滚动
+      if (activeTab !== 'hall' || !canClaim || !hasMore || loading || loadingMore) {
+        return;
+      }
 
-  // 获取已领取任务列表
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const pageHeight = document.documentElement.scrollHeight;
+
+      // 当滚动到距离底部 200px 时加载更多
+      if (scrollPosition >= pageHeight - 200) {
+        const newOffset = offsetRef.current + limit;
+        offsetRef.current = newOffset;
+        setOffset(newOffset);
+        fetchAvailableTasks(true);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [activeTab, canClaim, hasMore, loading, loadingMore, limit]);
   const fetchClaimedTasks = async () => {
     try {
       setLoading(true);
@@ -236,7 +284,10 @@ export default function PayoutTasksPage() {
 
       // 当滚动到距离底部 200px 时加载更多
       if (scrollPosition >= pageHeight - 200) {
-        handleLoadMore();
+        const newOffset = offsetRef.current + limit;
+        offsetRef.current = newOffset;
+        setOffset(newOffset);
+        fetchAvailableTasks(true);
       }
     };
 
@@ -244,7 +295,7 @@ export default function PayoutTasksPage() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [activeTab, canClaim, hasMore, loading, loadingMore, offset]);
+  }, [activeTab, canClaim, hasMore, loading, loadingMore, limit]);
 
   if (!isAuthenticated) {
     return null;
