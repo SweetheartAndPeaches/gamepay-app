@@ -69,6 +69,7 @@ export default function PayoutTasksPage() {
     totalOutcome: 0,
   });
   const [skipRefreshClaimed, setSkipRefreshClaimed] = useState(false);
+  const [skipSetActiveTab, setSkipSetActiveTab] = useState(false);
 
   // 分页状态
   const [offset, setOffset] = useState(0);
@@ -202,7 +203,8 @@ export default function PayoutTasksPage() {
         setHasMore(data.data.hasMore || false);
 
         // 如果用户有未完成的任务，添加到已领取列表
-        if (data.data.activeTask) {
+        // 只有当 skipSetActiveTab 为 false 时才自动切换（避免循环切换）
+        if (data.data.activeTask && !skipSetActiveTab) {
           setClaimedTasks([data.data.activeTask]);
           setActiveTask(data.data.activeTask);
           setActiveTab('claimed');
@@ -420,7 +422,13 @@ export default function PayoutTasksPage() {
   // 切换到任务大厅时重新检查任务状态
   useEffect(() => {
     if (activeTab === 'hall' && isAuthenticated) {
+      // 设置标志，避免 fetchAvailableTasks 内部的 setActiveTab 导致循环切换
+      setSkipSetActiveTab(true);
       fetchAvailableTasks();
+      // 延迟重置标志，确保 fetchAvailableTasks 内部的逻辑已经执行
+      setTimeout(() => {
+        setSkipSetActiveTab(false);
+      }, 100);
     }
   }, [activeTab]);
 
