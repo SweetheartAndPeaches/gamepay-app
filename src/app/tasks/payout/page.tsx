@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import { authFetch } from '@/lib/auth';
-import { Wallet, Clock, AlertCircle } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -46,6 +46,19 @@ export default function PayoutTasksPage() {
   const [isClaiming, setIsClaiming] = useState(false);
   const [loading, setLoading] = useState(true);
   const [canClaim, setCanClaim] = useState(true);
+
+  // 统计数据
+  const statistics = {
+    availableBalance: user?.balance || 0,
+    frozenBalance: user?.frozenBalance || 0,
+    totalIncome: claimedTasks
+      .filter((task) => task.status === 'completed')
+      .reduce((sum, task) => sum + task.commission, 0),
+    totalOutcome: 0, // 暂无支出数据
+  };
+
+  // 格式化统计数据的金额
+  const formatStatsCurrency = (value: number) => formatCurrency(value.toString());
 
   // 检查登录状态
   useEffect(() => {
@@ -197,20 +210,37 @@ export default function PayoutTasksPage() {
           </Card>
         )}
 
-        {/* 任务统计 */}
-        <Card className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-          <div className="flex items-center gap-3 mb-2">
-            <Wallet className="w-8 h-8" />
-            <div>
-              <p className="text-sm opacity-90">{t('tasks.payout.yourBalance')}</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(user?.balance?.toString() || '0')}
-              </p>
+        {/* 余额卡片 */}
+        <Card className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Wallet className="w-5 h-5" />
+              <span className="text-sm opacity-90">{t('balance.available')}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 opacity-75" />
+              <span className="text-sm opacity-75">
+                {t('balance.frozen')}: {formatStatsCurrency(statistics.frozenBalance)}
+              </span>
             </div>
           </div>
-          <p className="text-xs opacity-80">
-            {t('tasks.payout.completePayoutTasks')}
-          </p>
+          <div className="text-3xl font-bold mb-4">
+            {formatStatsCurrency(statistics.availableBalance)}
+          </div>
+          <div className="flex gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <ArrowDownCircle className="w-4 h-4 opacity-75" />
+              <span>
+                {t('balanceHistory.totalIncome')}: {formatStatsCurrency(statistics.totalIncome)}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <ArrowUpCircle className="w-4 h-4 opacity-75" />
+              <span>
+                {t('balanceHistory.totalOutcome')}: {formatStatsCurrency(statistics.totalOutcome)}
+              </span>
+            </div>
+          </div>
         </Card>
 
         {/* 任务 Tabs */}
