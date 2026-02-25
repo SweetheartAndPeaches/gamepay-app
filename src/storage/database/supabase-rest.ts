@@ -1,26 +1,49 @@
 /**
  * Supabase REST API 客户端
- * 用于通过 HTTP API 访问 Supabase，绕过 IPv6 连接问题
+ * 用于通过 HTTP API 访问 Supabase
+ * 
+ * 安全说明：
+ * - 服务端应使用 SERVICE_ROLE_KEY（环境变量：SUPABASE_SERVICE_ROLE_KEY）
+ * - SERVICE_ROLE_KEY 拥有完全权限，绕过 RLS
+ * - 不要将 SERVICE_ROLE_KEY 暴露给前端
  */
 
 interface SupabaseConfig {
   url: string;
   apiKey: string;
+  useServiceRole?: boolean;
 }
 
 function getConfig(): SupabaseConfig {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const apiKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  // 优先使用 SERVICE_ROLE_KEY（服务端）
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  // 如果没有 SERVICE_ROLE_KEY，降级使用 ANON_KEY（不推荐用于生产环境）
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url) {
     throw new Error('NEXT_PUBLIC_SUPABASE_URL is not set');
   }
 
-  if (!apiKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY is not set');
+  if (!serviceRoleKey && !anonKey) {
+    throw new Error('Neither SUPABASE_SERVICE_ROLE_KEY nor NEXT_PUBLIC_SUPABASE_ANON_KEY is set');
   }
 
-  return { url, apiKey };
+  // 使用 SERVICE_ROLE_KEY（如果可用），否则使用 ANON_KEY
+  const apiKey = serviceRoleKey || anonKey!;
+  const useServiceRole = !!serviceRoleKey;
+
+  // 如果使用 ANON_KEY，发出警告
+  if (!useServiceRole && process.env.NODE_ENV === 'production') {
+    console.warn(
+      '[SECURITY WARNING] Using ANON_KEY in production environment. ' +
+      'Please set SUPABASE_SERVICE_ROLE_KEY for better security.'
+    );
+  }
+
+  return { url, apiKey, useServiceRole };
 }
 
 /**
