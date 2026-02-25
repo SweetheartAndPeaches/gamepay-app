@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyToken } from '@/lib/jwt';
+import { query } from '@/storage/database/postgres-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,30 +21,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient(token);
-
     // 获取用户已领取的任务
-    const { data: tasks, error: tasksError } = await client
-      .from('orders')
-      .select('*')
-      .eq('user_id', payload.userId)
-      .eq('type', 'payout')
-      .in('status', ['claimed', 'completed'])
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (tasksError) {
-      console.error('Get claimed tasks error:', tasksError);
-      return NextResponse.json(
-        { success: false, message: '获取已领取任务失败' },
-        { status: 500 }
-      );
-    }
+    const tasks = await query(
+      `SELECT * FROM orders
+       WHERE user_id = $1
+         AND type = 'payout'
+         AND status IN ('claimed', 'completed')
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [payload.userId]
+    );
 
     return NextResponse.json({
       success: true,
       message: '获取已领取任务成功',
-      data: tasks || [],
+      data: tasks,
     });
   } catch (error) {
     console.error('Get claimed tasks error:', error);

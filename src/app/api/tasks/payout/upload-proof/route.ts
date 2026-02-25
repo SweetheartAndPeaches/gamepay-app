@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyToken } from '@/lib/jwt';
+import { queryOne, execute } from '@/storage/database/postgres-client';
 
 interface UploadProofRequest {
   orderId: string;
@@ -43,19 +43,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient(token);
-
     // 检查订单是否属于当前用户
-    const { data: order, error: orderError } = await client
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .eq('user_id', payload.userId)
-      .eq('type', 'payout')
-      .eq('status', 'claimed')
-      .single();
+    const order = await queryOne(
+      `SELECT * FROM orders
+       WHERE id = $1
+         AND user_id = $2
+         AND type = 'payout'
+         AND status = 'claimed'`,
+      [orderId, payload.userId]
+    );
 
-    if (orderError || !order) {
+    if (!order) {
       return NextResponse.json(
         { success: false, message: '订单不存在或状态不正确' },
         { status: 404 }
@@ -71,23 +69,26 @@ export async function POST(request: NextRequest) {
     }
 
     // 更新支付凭证
-    const { data: updatedOrder, error: updateError } = await client
-      .from('orders')
-      .update({
-        payment_screenshot_url: screenshotUrl,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId)
-      .select()
-      .single();
+    const rowCount = await execute(
+      `UPDATE orders
+       SET payment_screenshot_url = $1,
+           updated_at = NOW()
+       WHERE id = $2`,
+      [screenshotUrl, orderId]
+    );
 
-    if (updateError) {
-      console.error('Upload proof error:', updateError);
+    if (rowCount === 0) {
       return NextResponse.json(
         { success: false, message: '上传支付凭证失败，请重试' },
         { status: 500 }
       );
     }
+
+    // 获取更新后的订单
+    const updatedOrder = await queryOne(
+      `SELECT * FROM orders WHERE id = $1`,
+      [orderId]
+    );
 
     return NextResponse.json({
       success: true,

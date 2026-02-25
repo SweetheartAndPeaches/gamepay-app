@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyToken } from '@/lib/jwt';
+import { query, queryOne, execute } from '@/storage/database/postgres-client';
 
 interface ClaimRequest {
   orderId: string;
@@ -35,24 +35,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient(token);
-
     // 检查用户是否已有未完成的任务
-    const { data: activeTask, error: activeTaskError } = await client
-      .from('orders')
-      .select('*')
-      .eq('user_id', payload.userId)
-      .eq('type', 'payout')
-      .eq('status', 'claimed')
-      .maybeSingle();
-
-    if (activeTaskError) {
-      console.error('Get active task error:', activeTaskError);
-      return NextResponse.json(
-        { success: false, message: '获取任务状态失败' },
-        { status: 500 }
-      );
-    }
+    const activeTask = await queryOne(
+      `SELECT * FROM orders
+       WHERE user_id = $1
+         AND type = 'payout'
+         AND status = 'claimed'`,
+      [payload.userId]
+    );
 
     if (activeTask) {
       return NextResponse.json(
@@ -62,15 +52,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查订单是否可领取
-    const { data: order, error: orderError } = await client
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .eq('type', 'payout')
-      .eq('status', 'pending')
-      .single();
+    const order = await queryOne(
+      `SELECT * FROM orders
+       WHERE id = $1
+         AND type = 'payout'
+         AND status = 'pending'`,
+      [orderId]
+    );
 
-    if (orderError || !order) {
+    if (!order) {
       return NextResponse.json(
         { success: false, message: '任务不存在或已被领取' },
         { status: 404 }
@@ -86,24 +76,27 @@ export async function POST(request: NextRequest) {
     }
 
     // 领取任务
-    const { data: updatedOrder, error: updateError } = await client
-      .from('orders')
-      .update({
-        user_id: payload.userId,
-        status: 'claimed',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', orderId)
-      .select()
-      .single();
+    const rowCount = await execute(
+      `UPDATE orders
+       SET user_id = $1,
+           status = 'claimed',
+           updated_at = NOW()
+       WHERE id = $2`,
+      [payload.userId, orderId]
+    );
 
-    if (updateError) {
-      console.error('Claim task error:', updateError);
+    if (rowCount === 0) {
       return NextResponse.json(
         { success: false, message: '领取任务失败，请重试' },
         { status: 500 }
       );
     }
+
+    // 获取更新后的订单
+    const updatedOrder = await queryOne(
+      `SELECT * FROM orders WHERE id = $1`,
+      [orderId]
+    );
 
     return NextResponse.json({
       success: true,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyToken } from '@/lib/jwt';
+import { query, queryOne } from '@/storage/database/postgres-client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,24 +21,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient(token);
-
     // 获取用户当前是否有未完成的任务
-    const { data: activeTask, error: activeTaskError } = await client
-      .from('orders')
-      .select('*')
-      .eq('user_id', payload.userId)
-      .eq('type', 'payout')
-      .eq('status', 'claimed')
-      .maybeSingle();
-
-    if (activeTaskError) {
-      console.error('Get active task error:', activeTaskError);
-      return NextResponse.json(
-        { success: false, message: '获取任务失败' },
-        { status: 500 }
-      );
-    }
+    const activeTask = await queryOne(
+      `SELECT * FROM orders
+       WHERE user_id = $1
+         AND type = 'payout'
+         AND status = 'claimed'`,
+      [payload.userId]
+    );
 
     // 如果用户有未完成的任务，不允许领取新任务
     if (activeTask) {
@@ -54,29 +44,21 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取可领取的任务列表
-    const { data: tasks, error: tasksError } = await client
-      .from('orders')
-      .select('*')
-      .eq('type', 'payout')
-      .eq('status', 'pending')
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(20);
-
-    if (tasksError) {
-      console.error('Get available tasks error:', tasksError);
-      return NextResponse.json(
-        { success: false, message: '获取任务列表失败' },
-        { status: 500 }
-      );
-    }
+    const tasks = await query(
+      `SELECT * FROM orders
+       WHERE type = 'payout'
+         AND status = 'pending'
+         AND expires_at > NOW()
+       ORDER BY created_at DESC
+       LIMIT 20`
+    );
 
     return NextResponse.json({
       success: true,
       message: '获取任务列表成功',
       data: {
         canClaim: true,
-        tasks: tasks || [],
+        tasks,
       },
     });
   } catch (error) {
