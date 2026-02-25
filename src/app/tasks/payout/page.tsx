@@ -45,7 +45,13 @@ export default function PayoutTasksPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isClaiming, setIsClaiming] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [canClaim, setCanClaim] = useState(true);
+
+  // 分页状态
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 10;
 
   // 统计数据
   const statistics = {
@@ -69,15 +75,32 @@ export default function PayoutTasksPage() {
   }, [isAuthenticated, router]);
 
   // 获取可领取任务列表
-  const fetchAvailableTasks = async () => {
+  const fetchAvailableTasks = async (loadMore = false) => {
     try {
-      setLoading(true);
-      const response = await authFetch('/api/tasks/payout/available');
+      if (!loadMore) {
+        setLoading(true);
+        setOffset(0);
+      } else {
+        setLoadingMore(true);
+      }
+
+      const response = await authFetch(
+        `/api/tasks/payout/available?offset=${offset}&limit=${limit}`
+      );
       const data: ApiResponse = await response.json();
 
       if (data.success) {
         setCanClaim(data.data.canClaim);
-        setAvailableTasks(data.data.tasks || []);
+
+        if (loadMore) {
+          // 加载更多：追加数据
+          setAvailableTasks(prev => [...prev, ...(data.data.tasks || [])]);
+        } else {
+          // 首次加载：替换数据
+          setAvailableTasks(data.data.tasks || []);
+        }
+
+        setHasMore(data.data.hasMore || false);
 
         // 如果用户有未完成的任务，添加到已领取列表
         if (data.data.activeTask) {
@@ -92,8 +115,20 @@ export default function PayoutTasksPage() {
       console.error('Fetch available tasks error:', error);
       toast.error('获取任务列表失败');
     } finally {
-      setLoading(false);
+      if (!loadMore) {
+        setLoading(false);
+      } else {
+        setLoadingMore(false);
+      }
     }
+  };
+
+  // 加载更多任务
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMore) return;
+    const newOffset = offset + limit;
+    setOffset(newOffset);
+    fetchAvailableTasks(true);
   };
 
   // 获取已领取任务列表
@@ -188,6 +223,29 @@ export default function PayoutTasksPage() {
     }
   }, [activeTab, isAuthenticated]);
 
+  // 滚动监听 - 实现无限滚动
+  useEffect(() => {
+    const handleScroll = () => {
+      // 只在任务大厅标签页中启用无限滚动
+      if (activeTab !== 'hall' || !canClaim || !hasMore || loading || loadingMore) {
+        return;
+      }
+
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const pageHeight = document.documentElement.scrollHeight;
+
+      // 当滚动到距离底部 200px 时加载更多
+      if (scrollPosition >= pageHeight - 200) {
+        handleLoadMore();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [activeTab, canClaim, hasMore, loading, loadingMore, offset]);
+
   if (!isAuthenticated) {
     return null;
   }
@@ -269,63 +327,79 @@ export default function PayoutTasksPage() {
                 {t('tasks.payout.noTasks')}
               </div>
             ) : (
-              availableTasks.map((order) => (
-                <Card key={order.id} className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm text-gray-600">
-                        {order.order_no}
-                      </span>
+              <>
+                {availableTasks.map((order) => (
+                  <Card key={order.id} className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          {order.order_no}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isExpiringSoon(order.expires_at) && (
+                          <Badge variant="destructive" className="text-xs">
+                            {t('tasks.payout.expiringSoon')}
+                          </Badge>
+                        )}
+                        {getStatusBadge(order.status)}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {isExpiringSoon(order.expires_at) && (
-                        <Badge variant="destructive" className="text-xs">
-                          {t('tasks.payout.expiringSoon')}
-                        </Badge>
-                      )}
-                      {getStatusBadge(order.status)}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-3 gap-3 mb-3">
-                    <div>
-                      <p className="text-xs text-gray-600">{t('tasks.payout.orderAmount')}</p>
-                      <p className="font-bold text-gray-900">
-                        {formatCurrency(order.amount)}
-                      </p>
+                    <div className="grid grid-cols-3 gap-3 mb-3">
+                      <div>
+                        <p className="text-xs text-gray-600">{t('tasks.payout.orderAmount')}</p>
+                        <p className="font-bold text-gray-900">
+                          {formatCurrency(order.amount)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-600">{t('tasks.payout.reward')}</p>
+                        <p className="font-bold text-green-600">
+                          +{formatCurrency(order.commission)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-600">{t('tasks.payout.paymentMethod')}</p>
+                        <p className="font-medium text-gray-900">
+                          {formatPaymentMethod(order.payment_method)}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-gray-600">{t('tasks.payout.reward')}</p>
-                      <p className="font-bold text-green-600">
-                        +{formatCurrency(order.commission)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-600">{t('tasks.payout.paymentMethod')}</p>
-                      <p className="font-medium text-gray-900">
-                        {formatPaymentMethod(order.payment_method)}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      className="flex-1"
-                      onClick={() => setSelectedOrder(order)}
-                    >
-                      {t('tasks.payout.viewDetails')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => handleClaim(order.id)}
-                      disabled={isClaiming}
-                    >
-                      {isClaiming ? t('tasks.payout.submitting') : t('tasks.payout.claim')}
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        className="flex-1"
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        {t('tasks.payout.viewDetails')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleClaim(order.id)}
+                        disabled={isClaiming}
+                      >
+                        {isClaiming ? t('tasks.payout.submitting') : t('tasks.payout.claim')}
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+
+                {/* 加载更多指示器 */}
+                {loadingMore && (
+                  <div className="text-center py-4 text-gray-500">
+                    {t('common.loading')}
                   </div>
-                </Card>
-              ))
+                )}
+
+                {/* 没有更多数据提示 */}
+                {!hasMore && availableTasks.length > 0 && (
+                  <div className="text-center py-4 text-gray-400 text-sm">
+                    {t('common.noMoreData')}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 

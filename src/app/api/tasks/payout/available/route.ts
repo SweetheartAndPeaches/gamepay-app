@@ -21,6 +21,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // 获取分页参数
+    const searchParams = request.nextUrl.searchParams;
+    const offset = parseInt(searchParams.get('offset') || '0');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
     // 获取用户当前是否有未完成的任务
     const activeTask = await supabaseQueryOne(
       'orders',
@@ -42,11 +47,12 @@ export async function GET(request: NextRequest) {
           canClaim: false,
           activeTask,
           tasks: [],
+          hasMore: false,
         },
       });
     }
 
-    // 获取可领取的任务列表
+    // 获取可领取的任务列表（支持分页）
     const tasks = await supabaseQuery(
       'orders',
       {
@@ -54,7 +60,8 @@ export async function GET(request: NextRequest) {
           type: 'payout',
           status: 'pending',
         },
-        limit: 20,
+        limit: limit + 1, // 多查一条用于判断是否有更多数据
+        offset: offset,
         order: {
           column: 'created_at',
           ascending: false,
@@ -62,8 +69,12 @@ export async function GET(request: NextRequest) {
       }
     );
 
+    // 判断是否还有更多数据
+    const hasMore = tasks.length > limit;
+    const validTasks = hasMore ? tasks.slice(0, limit) : tasks;
+
     // 过滤掉已过期的任务
-    const validTasks = tasks.filter((task: any) => {
+    const filteredTasks = validTasks.filter((task: any) => {
       return new Date(task.expires_at) > new Date();
     });
 
@@ -72,7 +83,10 @@ export async function GET(request: NextRequest) {
       message: '获取任务列表成功',
       data: {
         canClaim: true,
-        tasks: validTasks,
+        tasks: filteredTasks,
+        hasMore: hasMore,
+        offset: offset,
+        limit: limit,
       },
     });
   } catch (error) {

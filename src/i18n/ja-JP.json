@@ -15,6 +15,7 @@
     "filter": "フィルター",
     "refresh": "更新",
     "noData": "データがありません",
+    "noMoreData": "これ以上データがありません",
     "all": "すべて",
     "enabled": "有効",
     "disabled": "無効",

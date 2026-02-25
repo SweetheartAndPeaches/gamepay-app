@@ -15,6 +15,7 @@
     "filter": "Filter",
     "refresh": "Refresh",
     "noData": "No data available",
+    "noMoreData": "No more data",
     "all": "All",
     "enabled": "Enabled",
     "disabled": "Disabled",
