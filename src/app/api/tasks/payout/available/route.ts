@@ -70,15 +70,11 @@ export async function GET(request: NextRequest) {
     };
 
     // 添加金额范围筛选（数据库层面）
-    // 使用 and=() 语法进行范围查询
-    if (minAmount > 0 && maxAmount !== Infinity) {
-      // 同时有最小和最大金额限制，使用 and=() 语法
-      filter.amount = `and=(amount.gte.${minAmount},amount.lte.${maxAmount})`;
-    } else if (minAmount > 0) {
-      // 只有最小金额限制
+    // Supabase REST API 不支持直接在 filter 中使用 and=() 语法
+    // 我们需要先查询所有任务，然后在后端过滤金额范围
+    if (minAmount > 0) {
       filter.amount = `gte.${minAmount}`;
     }
-    // maxAmount === Infinity 时不添加限制
 
     console.log('[API Available Tasks] Query filter:', filter);
 
@@ -105,10 +101,11 @@ export async function GET(request: NextRequest) {
       maxAmount,
     });
 
-    // 过滤掉已过期的任务（金额范围已在数据库层面筛选）
+    // 过滤掉已过期的任务和超出金额上限的任务
     const filteredTasks = validTasks.filter((task: any) => {
       const isNotExpired = new Date(task.expires_at) > new Date();
-      return isNotExpired;
+      const isWithinMaxAmount = maxAmount === Infinity || task.amount <= maxAmount;
+      return isNotExpired && isWithinMaxAmount;
     });
 
     console.log('[API Available Tasks] After filter:', {
@@ -116,20 +113,17 @@ export async function GET(request: NextRequest) {
       amounts: filteredTasks.map((t: any) => t.amount),
     });
 
-    console.log('[API Available Tasks] After filter:', {
-      tasksCount: filteredTasks.length,
-      amounts: filteredTasks.map((t: any) => t.amount),
-    });
+    // 优化分页逻辑：如果过滤后的任务数远少于 limit，说明大部分数据被过滤了
+    // 调整 hasMore 判断，避免用户一直看到"加载更多"但实际没数据
+    const effectiveHasMore = hasMore && filteredTasks.length > 0;
 
-    // 如果过滤后的任务数为 0，且还有更多数据，需要继续查询下一页
-    // 否则直接返回结果
     return NextResponse.json({
       success: true,
       message: '获取任务列表成功',
       data: {
         canClaim: true,
         tasks: filteredTasks,
-        hasMore: hasMore,
+        hasMore: effectiveHasMore,
         offset: offset,
         limit: limit,
       },
