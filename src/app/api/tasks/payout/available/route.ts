@@ -70,10 +70,15 @@ export async function GET(request: NextRequest) {
     };
 
     // 添加金额范围筛选（数据库层面）
-    // 注意：Supabase REST API 会自动处理数字比较，但我们需要确保 minAmount 是数字
-    if (minAmount > 0 && isFinite(minAmount)) {
+    // 使用 and=() 语法进行范围查询
+    if (minAmount > 0 && maxAmount !== Infinity) {
+      // 同时有最小和最大金额限制，使用 and=() 语法
+      filter.amount = `and=(amount.gte.${minAmount},amount.lte.${maxAmount})`;
+    } else if (minAmount > 0) {
+      // 只有最小金额限制
       filter.amount = `gte.${minAmount}`;
     }
+    // maxAmount === Infinity 时不添加限制
 
     console.log('[API Available Tasks] Query filter:', filter);
 
@@ -100,16 +105,15 @@ export async function GET(request: NextRequest) {
       maxAmount,
     });
 
-    // 过滤掉已过期的任务和超出最大金额的任务
+    // 过滤掉已过期的任务（金额范围已在数据库层面筛选）
     const filteredTasks = validTasks.filter((task: any) => {
       const isNotExpired = new Date(task.expires_at) > new Date();
-      const taskAmount = parseFloat(task.amount);
-      const isAboveMinAmount = taskAmount >= minAmount;
-      const isBelowMaxAmount = maxAmount === Infinity || taskAmount <= maxAmount;
-      
-      console.log(`[Filter Task] Order: ${task.order_no}, Amount: ${task.amount} (${typeof task.amount}), Parsed: ${taskAmount}, Min: ${minAmount}, Max: ${maxAmount}, Valid: ${isNotExpired && isAboveMinAmount && isBelowMaxAmount}`);
-      
-      return isNotExpired && isAboveMinAmount && isBelowMaxAmount;
+      return isNotExpired;
+    });
+
+    console.log('[API Available Tasks] After filter:', {
+      tasksCount: filteredTasks.length,
+      amounts: filteredTasks.map((t: any) => t.amount),
     });
 
     console.log('[API Available Tasks] After filter:', {

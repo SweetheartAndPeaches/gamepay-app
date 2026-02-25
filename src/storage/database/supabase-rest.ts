@@ -73,7 +73,10 @@ export async function supabaseQuery<T = any>(
   if (options.filter) {
     Object.entries(options.filter).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (typeof value === 'string' && value.startsWith('neq.')) {
+        if (typeof value === 'string' && value.startsWith('and=')) {
+          // 处理 and=() 格式，用于复合条件
+          queryParams.append(key, value);
+        } else if (typeof value === 'string' && value.startsWith('neq.')) {
           queryParams.append(`${key}`, `neq.${value.substring(4)}`);
         } else if (typeof value === 'string' && value.startsWith('gt.')) {
           queryParams.append(`${key}`, `gt.${value.substring(3)}`);
