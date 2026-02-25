@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
-import { query, queryOne, execute } from '@/storage/database/postgres-client';
+import { supabaseQueryOne, supabaseUpdate } from '@/storage/database/supabase-rest';
 
 interface ClaimRequest {
   orderId: string;
@@ -36,12 +36,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查用户是否已有未完成的任务
-    const activeTask = await queryOne(
-      `SELECT * FROM orders
-       WHERE user_id = $1
-         AND type = 'payout'
-         AND status = 'claimed'`,
-      [payload.userId]
+    const activeTask = await supabaseQueryOne(
+      'orders',
+      {
+        filter: {
+          user_id: payload.userId,
+          type: 'payout',
+          status: 'claimed',
+        },
+      }
     );
 
     if (activeTask) {
@@ -52,12 +55,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查订单是否可领取
-    const order = await queryOne(
-      `SELECT * FROM orders
-       WHERE id = $1
-         AND type = 'payout'
-         AND status = 'pending'`,
-      [orderId]
+    const order = await supabaseQueryOne(
+      'orders',
+      {
+        filter: {
+          id: orderId,
+          type: 'payout',
+          status: 'pending',
+        },
+      }
     );
 
     if (!order) {
@@ -76,32 +82,29 @@ export async function POST(request: NextRequest) {
     }
 
     // 领取任务
-    const rowCount = await execute(
-      `UPDATE orders
-       SET user_id = $1,
-           status = 'claimed',
-           updated_at = NOW()
-       WHERE id = $2`,
-      [payload.userId, orderId]
+    const updatedOrder = await supabaseUpdate(
+      'orders',
+      {
+        user_id: payload.userId,
+        status: 'claimed',
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: orderId,
+      }
     );
 
-    if (rowCount === 0) {
+    if (updatedOrder.length === 0) {
       return NextResponse.json(
         { success: false, message: '领取任务失败，请重试' },
         { status: 500 }
       );
     }
 
-    // 获取更新后的订单
-    const updatedOrder = await queryOne(
-      `SELECT * FROM orders WHERE id = $1`,
-      [orderId]
-    );
-
     return NextResponse.json({
       success: true,
       message: '领取任务成功',
-      data: updatedOrder,
+      data: updatedOrder[0],
     });
   } catch (error) {
     console.error('Claim task error:', error);

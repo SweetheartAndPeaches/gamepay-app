@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
-import { query, queryOne } from '@/storage/database/postgres-client';
+import { supabaseQuery, supabaseQueryOne } from '@/storage/database/supabase-rest';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,12 +22,15 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取用户当前是否有未完成的任务
-    const activeTask = await queryOne(
-      `SELECT * FROM orders
-       WHERE user_id = $1
-         AND type = 'payout'
-         AND status = 'claimed'`,
-      [payload.userId]
+    const activeTask = await supabaseQueryOne(
+      'orders',
+      {
+        filter: {
+          user_id: payload.userId,
+          type: 'payout',
+          status: 'claimed',
+        },
+      }
     );
 
     // 如果用户有未完成的任务，不允许领取新任务
@@ -44,21 +47,32 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取可领取的任务列表
-    const tasks = await query(
-      `SELECT * FROM orders
-       WHERE type = 'payout'
-         AND status = 'pending'
-         AND expires_at > NOW()
-       ORDER BY created_at DESC
-       LIMIT 20`
+    const tasks = await supabaseQuery(
+      'orders',
+      {
+        filter: {
+          type: 'payout',
+          status: 'pending',
+        },
+        limit: 20,
+        order: {
+          column: 'created_at',
+          ascending: false,
+        },
+      }
     );
+
+    // 过滤掉已过期的任务
+    const validTasks = tasks.filter((task: any) => {
+      return new Date(task.expires_at) > new Date();
+    });
 
     return NextResponse.json({
       success: true,
       message: '获取任务列表成功',
       data: {
         canClaim: true,
-        tasks,
+        tasks: validTasks,
       },
     });
   } catch (error) {

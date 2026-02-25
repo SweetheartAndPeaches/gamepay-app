@@ -1,7 +1,21 @@
 import { Pool, PoolClient } from 'pg';
+import { lookup } from 'dns/promises';
 
 // 创建全局连接池
 let pool: Pool | null = null;
+let cachedHost: string | null = null;
+
+async function resolveIPv4(hostname: string): Promise<string> {
+  // 如果已经缓存了 IPv4 地址，直接返回
+  if (cachedHost) {
+    return cachedHost;
+  }
+
+  // 查询 IPv4 地址
+  const { address } = await lookup(hostname, { family: 4 });
+  cachedHost = address;
+  return address;
+}
 
 function getPool(): Pool {
   if (!pool) {
@@ -10,8 +24,15 @@ function getPool(): Pool {
       throw new Error('DATABASE_URL is not set in environment variables');
     }
 
+    // 解析 DATABASE_URL
+    const url = new URL(databaseUrl);
+
     pool = new Pool({
-      connectionString: databaseUrl,
+      host: url.hostname,
+      port: parseInt(url.port) || 5432,
+      database: url.pathname.substring(1),
+      user: url.username,
+      password: url.password,
       max: 20, // 最大连接数
       idleTimeoutMillis: 30000, // 空闲连接超时时间
       connectionTimeoutMillis: 10000, // 连接超时时间
@@ -27,6 +48,12 @@ function getPool(): Pool {
  */
 export async function getPostgresClient(): Promise<PoolClient> {
   const pool = getPool();
+
+  // 确保 DNS 解析为 IPv4
+  const databaseUrl = process.env.DATABASE_URL!;
+  const url = new URL(databaseUrl);
+  await resolveIPv4(url.hostname);
+
   return pool.connect();
 }
 

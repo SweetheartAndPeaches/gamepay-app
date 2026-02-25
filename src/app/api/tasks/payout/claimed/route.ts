@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
-import { query } from '@/storage/database/postgres-client';
+import { supabaseQuery } from '@/storage/database/supabase-rest';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,14 +22,20 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取用户已领取的任务
-    const tasks = await query(
-      `SELECT * FROM orders
-       WHERE user_id = $1
-         AND type = 'payout'
-         AND status IN ('claimed', 'completed')
-       ORDER BY created_at DESC
-       LIMIT 50`,
-      [payload.userId]
+    const tasks = await supabaseQuery(
+      'orders',
+      {
+        filter: {
+          user_id: payload.userId,
+          type: 'payout',
+          status: 'in.(claimed,completed)',
+        },
+        limit: 50,
+        order: {
+          column: 'created_at',
+          ascending: false,
+        },
+      }
     );
 
     return NextResponse.json({

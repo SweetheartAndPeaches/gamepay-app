@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
-import { queryOne, execute } from '@/storage/database/postgres-client';
+import { supabaseQueryOne, supabaseUpdate } from '@/storage/database/supabase-rest';
 
 interface UploadProofRequest {
   orderId: string;
@@ -44,13 +44,16 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查订单是否属于当前用户
-    const order = await queryOne(
-      `SELECT * FROM orders
-       WHERE id = $1
-         AND user_id = $2
-         AND type = 'payout'
-         AND status = 'claimed'`,
-      [orderId, payload.userId]
+    const order = await supabaseQueryOne(
+      'orders',
+      {
+        filter: {
+          id: orderId,
+          user_id: payload.userId,
+          type: 'payout',
+          status: 'claimed',
+        },
+      }
     );
 
     if (!order) {
@@ -69,31 +72,28 @@ export async function POST(request: NextRequest) {
     }
 
     // 更新支付凭证
-    const rowCount = await execute(
-      `UPDATE orders
-       SET payment_screenshot_url = $1,
-           updated_at = NOW()
-       WHERE id = $2`,
-      [screenshotUrl, orderId]
+    const updatedOrder = await supabaseUpdate(
+      'orders',
+      {
+        payment_screenshot_url: screenshotUrl,
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: orderId,
+      }
     );
 
-    if (rowCount === 0) {
+    if (updatedOrder.length === 0) {
       return NextResponse.json(
         { success: false, message: '上传支付凭证失败，请重试' },
         { status: 500 }
       );
     }
 
-    // 获取更新后的订单
-    const updatedOrder = await queryOne(
-      `SELECT * FROM orders WHERE id = $1`,
-      [orderId]
-    );
-
     return NextResponse.json({
       success: true,
       message: '上传支付凭证成功，等待审核',
-      data: updatedOrder,
+      data: updatedOrder[0],
     });
   } catch (error) {
     console.error('Upload proof error:', error);

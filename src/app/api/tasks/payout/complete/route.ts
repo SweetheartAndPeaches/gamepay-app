@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/jwt';
-import { getPostgresClient } from '@/storage/database/postgres-client';
+import { supabaseQueryOne, supabaseUpdate, supabaseInsert } from '@/storage/database/supabase-rest';
 
 interface CompleteRequest {
   orderId: string;
 }
 
 export async function POST(request: NextRequest) {
-  const client = await getPostgresClient();
-
   try {
     // 验证用户身份
     const token = request.headers.get('authorization')?.replace('Bearer ', '');
@@ -37,23 +35,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 开始事务
-    await client.query('BEGIN');
-
     // 检查订单是否属于当前用户
-    const orderResult = await client.query(
-      `SELECT * FROM orders
-       WHERE id = $1
-         AND user_id = $2
-         AND type = 'payout'
-         AND status = 'claimed'`,
-      [orderId, payload.userId]
+    const order = await supabaseQueryOne(
+      'orders',
+      {
+        filter: {
+          id: orderId,
+          user_id: payload.userId,
+          type: 'payout',
+          status: 'claimed',
+        },
+      }
     );
 
-    const order = orderResult.rows[0];
-
     if (!order) {
-      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, message: '订单不存在或状态不正确' },
         { status: 404 }
@@ -62,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     // 检查是否已上传支付凭证
     if (!order.payment_screenshot_url) {
-      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, message: '请先上传支付凭证' },
         { status: 400 }
@@ -70,28 +64,34 @@ export async function POST(request: NextRequest) {
     }
 
     // 标记任务为完成
-    await client.query(
-      `UPDATE orders
-       SET status = 'completed',
-           task_completed_at = NOW(),
-           updated_at = NOW()
-       WHERE id = $1`,
-      [orderId]
+    const now = new Date();
+    await supabaseUpdate(
+      'orders',
+      {
+        status: 'completed',
+        task_completed_at: now.toISOString(),
+        updated_at: now.toISOString(),
+      },
+      {
+        id: orderId,
+      }
     );
 
     // 计算奖励
     const reward = parseFloat(order.commission.toString());
 
     // 获取用户当前余额
-    const userResult = await client.query(
-      `SELECT balance FROM users WHERE id = $1`,
-      [payload.userId]
+    const user = await supabaseQueryOne(
+      'users',
+      {
+        select: 'balance',
+        filter: {
+          id: payload.userId,
+        },
+      }
     );
 
-    const user = userResult.rows[0];
-
     if (!user) {
-      await client.query('ROLLBACK');
       return NextResponse.json(
         { success: false, message: '获取用户信息失败' },
         { status: 500 }
@@ -101,31 +101,38 @@ export async function POST(request: NextRequest) {
     const newBalance = parseFloat(user.balance.toString()) + reward;
 
     // 更新用户余额
-    await client.query(
-      `UPDATE users
-       SET balance = $1,
-           updated_at = NOW()
-       WHERE id = $2`,
-      [newBalance, payload.userId]
+    await supabaseUpdate(
+      'users',
+      {
+        balance: newBalance,
+        updated_at: now.toISOString(),
+      },
+      {
+        id: payload.userId,
+      }
     );
 
     // 记录余额变动
-    await client.query(
-      `INSERT INTO balance_records (user_id, type, amount, balance_after, description, related_order_id, created_at, updated_at)
-       VALUES ($1, 'task_reward', $2, $3, $4, $5, NOW(), NOW())`,
-      [payload.userId, reward, newBalance, `完成代付任务奖励（订单号：${order.order_no}）`, order.id]
-    );
-
-    // 提交事务
-    await client.query('COMMIT');
+    await supabaseInsert('balance_records', {
+      user_id: payload.userId,
+      type: 'task_reward',
+      amount: reward,
+      balance_after: newBalance,
+      description: `完成代付任务奖励（订单号：${order.order_no}）`,
+      related_order_id: order.id,
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    });
 
     // 获取更新后的订单
-    const updatedOrderResult = await client.query(
-      `SELECT * FROM orders WHERE id = $1`,
-      [orderId]
+    const updatedOrder = await supabaseQueryOne(
+      'orders',
+      {
+        filter: {
+          id: orderId,
+        },
+      }
     );
-
-    const updatedOrder = updatedOrderResult.rows[0];
 
     return NextResponse.json({
       success: true,
@@ -137,13 +144,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error('Complete task error:', error);
     return NextResponse.json(
       { success: false, message: '服务器错误，请稍后重试' },
       { status: 500 }
     );
-  } finally {
-    client.release();
   }
 }
