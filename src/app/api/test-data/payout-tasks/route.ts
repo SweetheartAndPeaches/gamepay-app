@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
           break;
       }
 
-      // 随机用户 ID（模拟不同用户领取）
-      const userId = status === 'claimed' || status === 'completed' ? `user_${Math.floor(Math.random() * 100)}` : null;
+      // 用户 ID（测试数据设为 NULL）
+      const userId: string | null = null;
 
       const task = {
         order_no: orderNo,

@@ -2,26 +2,20 @@ import sys
 import os
 sys.path.insert(0, '/workspace/projects')
 
-import psycopg2
 from datetime import datetime, timedelta
 import random
 
-# 数据库连接配置
-DB_URL = os.environ.get('DATABASE_URL') or "postgresql://postgres:postgres@localhost:5432/postgres"
+# 使用项目中的 exec_sql 功能
+print("Starting data insertion via database connection...")
+print("Note: This script requires database access, please run SQL directly")
+print("Please use the SQL file: insert_payout_test_data.sql")
 
-print(f"Connecting to database...")
-conn = psycopg2.connect(DB_URL)
-cursor = conn.cursor()
+# 生成 INSERT 语句
+print("\nGenerating INSERT SQL statements...")
 
-print("Connected. Starting data insertion...")
-
-# 支付方式列表
 payment_methods = ['wechat', 'alipay', 'bank', 'paypal', 'venmo', 'cash_app', 'zelle', 'stripe', 'wise', 'payoneer', 'swift']
-
-# 状态列表
 statuses = ['pending', 'claimed', 'completed', 'expired', 'cancelled']
 
-# 生成账户信息
 def generate_payment_account(method):
     if method == 'wechat':
         return f"wx_{random.randint(100000, 999999)}"
@@ -47,72 +41,36 @@ def generate_payment_account(method):
         return f"SWIFT{random.randint(100000, 999999)}"
     return ""
 
-# 插入500条数据
+# 生成SQL文件
 count = 500
-for i in range(count):
-    try:
+with open('insert_payout_tasks_auto.sql', 'w') as f:
+    # 清理数据
+    f.write("DELETE FROM orders WHERE type = 'payout';\n\n")
+    
+    f.write("INSERT INTO orders (order_no, type, amount, commission, status, payment_method, payment_account, created_at, expires_at, updated_at)\n")
+    f.write("VALUES\n")
+    
+    values = []
+    for i in range(count):
         amount = round(random.uniform(100, 10000), 2)
         commission = round(amount * random.uniform(0.005, 0.02), 2)
         status = random.choices(statuses, weights=[0.5, 0.2, 0.2, 0.08, 0.02])[0]
-
-        # 生成订单号
-        order_no = f"PO{i:012d}"
-
-        # 选择支付方式
+        order_no = f"TEST{i:012d}"
         payment_method = random.choice(payment_methods)
         payment_account = generate_payment_account(payment_method)
-
-        # 生成时间
         created_at = datetime.now() - timedelta(days=random.uniform(0, 30))
         expires_at = created_at + timedelta(minutes=30)
+        
+        value = f"  ('{order_no}', 'payout', {amount}, {commission}, '{status}', '{payment_method}', '{payment_account}', '{created_at}', '{expires_at}', NOW())"
+        values.append(value)
+        
+        if (i + 1) % 100 == 0:
+            print(f"Generated {i + 1}/{count} SQL statements...")
+    
+    f.write(',\n'.join(values) + ';\n')
+    f.write("\n-- Verify data\n")
+    f.write("SELECT status, COUNT(*) as count, ROUND(AVG(amount), 2) as avg_amount FROM orders WHERE type = 'payout' GROUP BY status;\n")
 
-        # 插入数据
-        insert_sql = """
-            INSERT INTO orders (order_no, type, amount, commission, status, payment_method, payment_account, created_at, expires_at, updated_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-
-        cursor.execute(insert_sql, (
-            order_no,
-            'payout',
-            amount,
-            commission,
-            status,
-            payment_method,
-            payment_account,
-            created_at,
-            expires_at,
-            datetime.now()
-        ))
-
-        if (i + 1) % 50 == 0:
-            print(f"Inserted {i + 1}/{count} records...")
-            conn.commit()
-
-    except Exception as e:
-        print(f"Error inserting record {i}: {e}")
-        conn.rollback()
-        continue
-
-conn.commit()
-
-# 验证插入的数据
-cursor.execute("SELECT COUNT(*) FROM orders WHERE type = 'payout'")
-total = cursor.fetchone()[0]
-print(f"\nTotal payout tasks inserted: {total}")
-
-# 按状态统计
-cursor.execute("""
-    SELECT status, COUNT(*) as count
-    FROM orders
-    WHERE type = 'payout'
-    GROUP BY status
-    ORDER BY status
-""")
-print("\nStatus distribution:")
-for row in cursor.fetchall():
-    print(f"  {row[0]}: {row[1]}")
-
-cursor.close()
-conn.close()
-print("\nData insertion completed!")
+print(f"\nSQL file generated: insert_payout_tasks_auto.sql")
+print(f"Total statements: {count}")
+print("Please execute this SQL file to insert the data")
