@@ -55,8 +55,20 @@ export default function PayoutTasksPage() {
   
   // 使用 ref 避免重复加载请求和存储当前 offset
   const isLoadingRef = useRef(false);
+  const loadingRef = useRef(loading);
+  const loadingMoreRef = useRef(loadingMore);
   const offsetRef = useRef(offset);
   const loadedOrderIdsRef = useRef<Set<string>>(new Set());
+  
+  // 同步 loading 状态到 ref
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
+  // 同步 loadingMore 状态到 ref
+  useEffect(() => {
+    loadingMoreRef.current = loadingMore;
+  }, [loadingMore]);
   
   // 同步 offset 到 ref
   useEffect(() => {
@@ -101,9 +113,19 @@ export default function PayoutTasksPage() {
       }
 
       const response = await authFetch(
-        `/api/tasks/payout/available?offset=${offset}&limit=${limit}`
+        `/api/tasks/payout/available?offset=${loadMore ? offsetRef.current : offset}&limit=${limit}`
       );
       const data: ApiResponse = await response.json();
+
+      console.log('[Fetch Available Tasks]', {
+        loadMore,
+        offset: loadMore ? offsetRef.current : offset,
+        limit,
+        success: data.success,
+        canClaim: data.data?.canClaim,
+        tasksCount: data.data?.tasks?.length,
+        hasMore: data.data?.hasMore,
+      });
 
       if (data.success) {
         setCanClaim(data.data.canClaim);
@@ -152,30 +174,43 @@ export default function PayoutTasksPage() {
   };
 
   // 滚动监听 - 实现无限滚动
+  const handleScroll = useCallback(() => {
+    // 只在任务大厅标签页中启用无限滚动
+    if (activeTab !== 'hall' || !canClaim || !hasMore || isLoadingRef.current) {
+      return;
+    }
+
+    // 检查是否正在加载（通过 ref 检查 loading 和 loadingMore 状态）
+    if (loadingRef.current || loadingMoreRef.current) {
+      return;
+    }
+
+    const scrollPosition = window.innerHeight + window.scrollY;
+    const pageHeight = document.documentElement.scrollHeight;
+
+    // 当滚动到距离底部 200px 时加载更多
+    if (scrollPosition >= pageHeight - 200) {
+      console.log('[Infinite Scroll] Triggered load more', {
+        offset: offsetRef.current,
+        hasMore,
+        isLoading: isLoadingRef.current,
+        loading: loadingRef.current,
+        loadingMore: loadingMoreRef.current,
+      });
+      
+      const newOffset = offsetRef.current + limit;
+      offsetRef.current = newOffset;
+      setOffset(newOffset);
+      fetchAvailableTasks(true);
+    }
+  }, [activeTab, canClaim, hasMore, limit]);
+
   useEffect(() => {
-    const handleScroll = () => {
-      // 只在任务大厅标签页中启用无限滚动
-      if (activeTab !== 'hall' || !canClaim || !hasMore || loading || loadingMore) {
-        return;
-      }
-
-      const scrollPosition = window.innerHeight + window.scrollY;
-      const pageHeight = document.documentElement.scrollHeight;
-
-      // 当滚动到距离底部 200px 时加载更多
-      if (scrollPosition >= pageHeight - 200) {
-        const newOffset = offsetRef.current + limit;
-        offsetRef.current = newOffset;
-        setOffset(newOffset);
-        fetchAvailableTasks(true);
-      }
-    };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [activeTab, canClaim, hasMore, loading, loadingMore, limit]);
+  }, [handleScroll]);
   const fetchClaimedTasks = async () => {
     try {
       setLoading(true);
@@ -266,32 +301,6 @@ export default function PayoutTasksPage() {
       fetchClaimedTasks();
     }
   }, [activeTab, isAuthenticated]);
-
-  // 滚动监听 - 实现无限滚动
-  useEffect(() => {
-    const handleScroll = () => {
-      // 只在任务大厅标签页中启用无限滚动
-      if (activeTab !== 'hall' || !canClaim || !hasMore || loading || loadingMore) {
-        return;
-      }
-
-      const scrollPosition = window.innerHeight + window.scrollY;
-      const pageHeight = document.documentElement.scrollHeight;
-
-      // 当滚动到距离底部 200px 时加载更多
-      if (scrollPosition >= pageHeight - 200) {
-        const newOffset = offsetRef.current + limit;
-        offsetRef.current = newOffset;
-        setOffset(newOffset);
-        fetchAvailableTasks(true);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [activeTab, canClaim, hasMore, loading, loadingMore, limit]);
 
   if (!isAuthenticated) {
     return null;

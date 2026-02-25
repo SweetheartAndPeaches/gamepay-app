@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // 判断是否还有更多数据
+    // 判断是否还有更多数据（基于原始查询结果）
     const hasMore = tasks.length > limit;
     const validTasks = hasMore ? tasks.slice(0, limit) : tasks;
 
@@ -78,6 +78,8 @@ export async function GET(request: NextRequest) {
       return new Date(task.expires_at) > new Date();
     });
 
+    // 如果过滤后的任务数为 0，且还有更多数据，需要继续查询下一页
+    // 否则直接返回结果
     return NextResponse.json({
       success: true,
       message: '获取任务列表成功',
