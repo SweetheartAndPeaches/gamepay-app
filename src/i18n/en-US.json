@@ -86,7 +86,6 @@
       "claimTask": "Claim Task",
       "markCompleted": "Mark Completed",
       "completed": "Completed",
-      "amountRange": "{min}-{max}",
       "requiredTasks": "Complete {required} tasks today, {completed} completed",
       "standardReached": "Target Reached",
       "taskNo": "Order No.",
@@ -95,6 +94,14 @@
       "claimed": "Claimed",
       "pending": "Pending",
       "noTasks": "No available tasks",
+      "amountRange": {
+        "placeholder": "Select amount range",
+        "all": "All amounts",
+        "100_500": "100-500",
+        "501_1000": "501-1000",
+        "1001_2000": "1001-2000",
+        "2001_5000": "2001-5000"
+      },
       "status": {
         "pending": "Pending",
         "claimed": "Claimed",

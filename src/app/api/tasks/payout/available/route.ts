@@ -25,6 +25,8 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
+    const minAmount = parseFloat(searchParams.get('minAmount') || '0');
+    const maxAmount = parseFloat(searchParams.get('maxAmount') || 'Infinity');
 
     // 获取用户当前是否有未完成的任务
     const activeTask = await supabaseQueryOne(
@@ -52,14 +54,21 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 获取可领取的任务列表（支持分页）
+    // 获取可领取的任务列表（支持分页和金额范围筛选）
+    const filter: Record<string, any> = {
+      type: 'payout',
+      status: 'pending',
+    };
+
+    // 添加金额范围筛选
+    if (minAmount > 0) {
+      filter.amount = `gte.${minAmount}`;
+    }
+
     const tasks = await supabaseQuery(
       'orders',
       {
-        filter: {
-          type: 'payout',
-          status: 'pending',
-        },
+        filter,
         limit: limit + 1, // 多查一条用于判断是否有更多数据
         offset: offset,
         order: {
@@ -73,9 +82,11 @@ export async function GET(request: NextRequest) {
     const hasMore = tasks.length > limit;
     const validTasks = hasMore ? tasks.slice(0, limit) : tasks;
 
-    // 过滤掉已过期的任务
+    // 过滤掉已过期的任务和超出最大金额的任务
     const filteredTasks = validTasks.filter((task: any) => {
-      return new Date(task.expires_at) > new Date();
+      const isNotExpired = new Date(task.expires_at) > new Date();
+      const isInAmountRange = task.amount <= maxAmount;
+      return isNotExpired && isInAmountRange;
     });
 
     // 如果过滤后的任务数为 0，且还有更多数据，需要继续查询下一页

@@ -86,7 +86,6 @@
       "claimTask": "작업 수령",
       "markCompleted": "완료로 표시",
       "completed": "완료",
-      "amountRange": "{min}-{max} 원",
       "requiredTasks": "오늘 {required}건 완료 필요, {completed}건 완료됨",
       "standardReached": "목표 달성",
       "taskNo": "주문 번호",
@@ -95,6 +94,14 @@
       "claimed": "수령됨",
       "pending": "대기 중",
       "noTasks": "사용 가능한 작업 없음",
+      "amountRange": {
+        "placeholder": "금액 범위 선택",
+        "all": "전체 금액",
+        "100_500": "100-500 원",
+        "501_1000": "501-1000 원",
+        "1001_2000": "1001-2000 원",
+        "2001_5000": "2001-5000 원"
+      },
       "status": {
         "pending": "대기 중",
         "claimed": "수령됨",

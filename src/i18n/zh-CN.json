@@ -89,7 +89,6 @@
       "claimTask": "领取任务",
       "markCompleted": "标记已完成",
       "completed": "已完成",
-      "amountRange": "{min}-{max} 元",
       "requiredTasks": "今日需完成 {required} 单，已完成 {completed} 单",
       "standardReached": "已达标",
       "taskNo": "订单号",
@@ -98,6 +97,14 @@
       "claimed": "已领取",
       "pending": "待领取",
       "noTasks": "暂无可用任务",
+      "amountRange": {
+        "placeholder": "选择金额范围",
+        "all": "全部金额",
+        "100_500": "100-500 元",
+        "501_1000": "501-1000 元",
+        "1001_2000": "1001-2000 元",
+        "2001_5000": "2001-5000 元"
+      },
       "status": {
         "pending": "待领取",
         "claimed": "已领取",

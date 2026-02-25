@@ -7,10 +7,17 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import { authFetch } from '@/lib/auth';
-import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -33,6 +40,15 @@ interface ApiResponse {
   data?: any;
 }
 
+// 金额范围选项
+const AMOUNT_RANGES = [
+  { value: 'all', label: 'common.all', min: 0, max: Infinity },
+  { value: '100-500', label: 'tasks.payout.amountRange.100_500', min: 100, max: 500 },
+  { value: '501-1000', label: 'tasks.payout.amountRange.501_1000', min: 501, max: 1000 },
+  { value: '1001-2000', label: 'tasks.payout.amountRange.1001_2000', min: 1001, max: 2000 },
+  { value: '2001-5000', label: 'tasks.payout.amountRange.2001_5000', min: 2001, max: 5000 },
+];
+
 export default function PayoutTasksPage() {
   const { t, formatCurrency } = useI18n();
   const { user, isAuthenticated } = useAuth();
@@ -47,6 +63,7 @@ export default function PayoutTasksPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [canClaim, setCanClaim] = useState(true);
+  const [selectedAmountRange, setSelectedAmountRange] = useState('all');
 
   // 分页状态
   const [offset, setOffset] = useState(0);
@@ -112,8 +129,13 @@ export default function PayoutTasksPage() {
         setLoadingMore(true);
       }
 
+      // 获取当前选中的金额范围
+      const amountRange = AMOUNT_RANGES.find(range => range.value === selectedAmountRange);
+      const minAmount = amountRange?.min ?? 0;
+      const maxAmount = amountRange?.max ?? Infinity;
+
       const response = await authFetch(
-        `/api/tasks/payout/available?offset=${loadMore ? offsetRef.current : offset}&limit=${limit}`
+        `/api/tasks/payout/available?offset=${loadMore ? offsetRef.current : offset}&limit=${limit}&minAmount=${minAmount}&maxAmount=${maxAmount}`
       );
       const data: ApiResponse = await response.json();
 
@@ -302,6 +324,13 @@ export default function PayoutTasksPage() {
     }
   }, [activeTab, isAuthenticated]);
 
+  // 金额范围改变时重新加载任务列表
+  useEffect(() => {
+    if (isAuthenticated && activeTab === 'hall') {
+      fetchAvailableTasks();
+    }
+  }, [selectedAmountRange]);
+
   if (!isAuthenticated) {
     return null;
   }
@@ -366,6 +395,23 @@ export default function PayoutTasksPage() {
 
           {/* 任务大厅 */}
           <TabsContent value="hall" className="space-y-3 mt-4">
+            {/* 金额范围选择器 */}
+            <div className="flex items-center gap-2 mb-4">
+              <Filter className="w-4 h-4 text-gray-600" />
+              <Select value={selectedAmountRange} onValueChange={setSelectedAmountRange}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder={t('tasks.payout.amountRange.placeholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {AMOUNT_RANGES.map((range) => (
+                    <SelectItem key={range.value} value={range.value}>
+                      {t(range.label)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {loading ? (
               <div className="text-center py-8 text-gray-500">
                 {t('common.loading')}

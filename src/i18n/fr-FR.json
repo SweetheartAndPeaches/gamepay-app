@@ -86,7 +86,6 @@
       "claimTask": "Réclamer la tâche",
       "markCompleted": "Marquer comme complétée",
       "completed": "Complété",
-      "amountRange": "{min}-{max}",
       "requiredTasks": "Complétez {required} tâches aujourd'hui, {completed} complétées",
       "standardReached": "Objectif atteint",
       "taskNo": "Commande N°",
@@ -95,6 +94,14 @@
       "claimed": "Réclamé",
       "pending": "En attente",
       "noTasks": "Aucune tâche disponible",
+      "amountRange": {
+        "placeholder": "Sélectionner la plage de montant",
+        "all": "Tous les montants",
+        "100_500": "100-500",
+        "501_1000": "501-1000",
+        "1001_2000": "1001-2000",
+        "2001_5000": "2001-5000"
+      },
       "status": {
         "pending": "En attente",
         "claimed": "Réclamé",
