@@ -8,12 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ShareDialog from '@/components/ShareDialog';
 import { useI18n } from '@/i18n/context';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Users,
   TrendingUp,
   Link as LinkIcon,
   Share2,
   DollarSign,
+  Gift,
 } from 'lucide-react';
 
 interface SubUser {
@@ -33,6 +35,7 @@ interface Commission {
 
 export default function AgentPage() {
   const { t, formatCurrency } = useI18n();
+  const { user } = useAuth();
   const [shareOpen, setShareOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
 
@@ -68,8 +71,9 @@ export default function AgentPage() {
   };
 
   const handleShare = () => {
-    // 打开分享对话框
-    const inviteUrl = `${window.location.origin}?inviteCode=${agentData.inviteCode}&type=agent`;
+    // 打开分享对话框，使用用户邀请码
+    if (!user) return;
+    const inviteUrl = `${window.location.origin}?inviteCode=${user.inviteCode}`;
     setShareUrl(inviteUrl);
     setShareOpen(true);
   };
@@ -125,6 +129,34 @@ export default function AgentPage() {
             </div>
           )}
         </Card>
+
+        {/* 邀请好友卡片 */}
+        {user && (
+          <Card className="p-6 bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                <Gift className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold">{t('profile.inviteFriends')}</h3>
+                <p className="text-sm text-white/90">{t('profile.inviteFriendsDescription')}</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="bg-white/10 rounded-lg p-3">
+                <p className="text-xs text-white/80 mb-1">{t('profile.yourInviteCode')}</p>
+                <p className="text-xl font-bold tracking-wider">{user.inviteCode}</p>
+              </div>
+              <Button
+                onClick={handleShare}
+                className="w-full bg-white text-purple-600 hover:bg-white/90"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                {t('profile.shareInvite')}
+              </Button>
+            </div>
+          </Card>
+        )}
 
         {/* 推广链接和二维码 */}
         {agentData.isActive && (
