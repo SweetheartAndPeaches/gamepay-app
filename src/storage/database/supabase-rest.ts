@@ -86,7 +86,14 @@ export async function supabaseQuery<T = any>(
         } else if (typeof value === 'string' && value.startsWith('like.')) {
           queryParams.append(`${key}`, `like.${value.substring(5)}`);
         } else if (typeof value === 'string' && value.startsWith('in.')) {
-          queryParams.append(`${key}`, `in.(${value.substring(3)})`);
+          // 处理 in.() 格式：in.(a,b,c) -> in.(a,b,c)
+          // 处理 in. 格式：in.a,b,c -> in.(a,b,c)
+          const inValue = value.substring(3);
+          if (inValue.startsWith('(') && inValue.endsWith(')')) {
+            queryParams.append(`${key}`, `in.${inValue}`);
+          } else {
+            queryParams.append(`${key}`, `in.(${inValue})`);
+          }
         } else if (Array.isArray(value)) {
           queryParams.append(`${key}`, `in.(${value.join(',')})`);
         } else {
@@ -163,6 +170,7 @@ export async function supabaseInsert<T = any>(
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
       'Accept-Profile': 'public',
+      'Content-Profile': 'public',
     },
     body: JSON.stringify(data),
   });

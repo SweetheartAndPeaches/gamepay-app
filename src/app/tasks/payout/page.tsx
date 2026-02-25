@@ -119,7 +119,9 @@ export default function PayoutTasksPage() {
 
       if (data.success) {
         toast.success('领取任务成功');
-        await fetchAvailableTasks();
+        // 先刷新已领取任务列表
+        await fetchClaimedTasks();
+        // 再切换到已领取标签页
         setActiveTab('claimed');
       } else {
         toast.error(data.message || '领取任务失败');
