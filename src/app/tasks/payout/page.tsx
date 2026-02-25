@@ -51,7 +51,7 @@ const AMOUNT_RANGES = [
 
 export default function PayoutTasksPage() {
   const { t, formatCurrency } = useI18n();
-  const { user, isAuthenticated, token } = useAuth();
+  const { user, isAuthenticated, token, login } = useAuth();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState('hall');
@@ -290,6 +290,20 @@ export default function PayoutTasksPage() {
       }
     } catch (error) {
       console.error('Fetch balance statistics error:', error);
+    }
+  };
+
+  // 刷新用户信息（包括余额）
+  const refreshUserInfo = async () => {
+    try {
+      const response = await authFetch('/api/user/info');
+      const data: ApiResponse = await response.json();
+
+      if (data.success && data.data?.user && token) {
+        login(token, data.data.user);
+      }
+    } catch (error) {
+      console.error('Refresh user info error:', error);
     }
   };
 
@@ -682,6 +696,8 @@ export default function PayoutTasksPage() {
                     toast.success(`任务完成！订单金额 ${formatCurrency(data.data.orderAmount)} + 奖励 ${formatCurrency(data.data.commission)} = 总计 ${formatCurrency(data.data.totalReward)}`);
                     // 刷新余额统计
                     fetchBalanceStatistics();
+                    // 刷新用户信息（更新余额）
+                    refreshUserInfo();
                   } else {
                     toast.error(data.message || '完成任务失败');
                   }
