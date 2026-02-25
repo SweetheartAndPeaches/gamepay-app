@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useI18n } from '@/i18n/context';
-import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus } from 'lucide-react';
+import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield } from 'lucide-react';
 import PayinTaskDetailDialog from '@/components/PayinTaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -55,6 +55,21 @@ export default function PayinTasksPage() {
   const [enabled, setEnabled] = useState(true);
   const [hasAccounts, setHasAccounts] = useState(true);
   const [accounts, setAccounts] = useState<Account[]>([]);
+
+  // 统计数据
+  const statistics = {
+    availableBalance: userBalance,
+    frozenBalance: activeTask ? activeTask.amount : 0,
+    totalIncome: claimedTasks
+      .filter((task) => task.status === 'completed')
+      .reduce((sum, task) => sum + task.commission, 0),
+    totalOutcome: claimedTasks
+      .filter((task) => task.status === 'claimed')
+      .reduce((sum, task) => sum + task.amount, 0),
+  };
+
+  // 格式化统计数据的金额
+  const formatStatsCurrency = (value: number) => formatCurrency(value.toString());
 
   // 获取 token
   const getToken = () => {
@@ -232,15 +247,15 @@ export default function PayinTasksPage() {
   const getStatusBadge = (status: Order['status']) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="outline">待领取</Badge>;
+        return <Badge variant="outline">{t('tasks.payout.status.pending')}</Badge>;
       case 'claimed':
-        return <Badge variant="secondary">进行中</Badge>;
+        return <Badge variant="secondary">{t('tasks.payout.inProgress')}</Badge>;
       case 'completed':
-        return <Badge variant="default">已完成</Badge>;
+        return <Badge variant="default">{t('tasks.payout.completed')}</Badge>;
       case 'expired':
-        return <Badge variant="destructive">已过期</Badge>;
+        return <Badge variant="destructive">{t('common.error')}</Badge>;
       case 'cancelled':
-        return <Badge variant="secondary">已取消</Badge>;
+        return <Badge variant="secondary">{t('common.cancel')}</Badge>;
       default:
         return <Badge>{status}</Badge>;
     }
@@ -302,19 +317,38 @@ export default function PayinTasksPage() {
           </Card>
         )}
 
-        {/* 用户余额 */}
+        {/* 余额卡片 */}
         {enabled && hasAccounts && (
-          <Card className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white">
-            <div className="flex items-center gap-3 mb-2">
-              <Wallet className="w-8 h-8" />
-              <div>
-                <p className="text-sm opacity-90">您的可用余额</p>
-                <p className="text-2xl font-bold">{formatCurrency(userBalance)}</p>
+          <Card className="p-4 bg-gradient-to-br from-blue-600 to-blue-700 text-white">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Wallet className="w-5 h-5" />
+                <span className="text-sm opacity-90">{t('balance.available')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 opacity-75" />
+                <span className="text-sm opacity-75">
+                  {t('balance.frozen')}: {formatStatsCurrency(statistics.frozenBalance)}
+                </span>
               </div>
             </div>
-            <p className="text-xs opacity-80">
-              接收代收任务会冻结对应金额，完成后会返还到余额
-            </p>
+            <div className="text-3xl font-bold mb-4">
+              {formatStatsCurrency(statistics.availableBalance)}
+            </div>
+            <div className="flex gap-4 text-sm">
+              <div className="flex items-center gap-1">
+                <ArrowDownCircle className="w-4 h-4 opacity-75" />
+                <span>
+                  {t('balanceHistory.totalIncome')}: {formatStatsCurrency(statistics.totalIncome)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <ArrowUpCircle className="w-4 h-4 opacity-75" />
+                <span>
+                  {t('balanceHistory.totalOutcome')}: {formatStatsCurrency(statistics.totalOutcome)}
+                </span>
+              </div>
+            </div>
           </Card>
         )}
 
@@ -375,7 +409,7 @@ export default function PayinTasksPage() {
                   <div className="flex items-center gap-2">
                     {isExpiringSoon(order.expires_at) && (
                       <Badge variant="destructive" className="text-xs">
-                        即将过期
+                        {t('tasks.payin.expiringSoon')}
                       </Badge>
                     )}
                     {getStatusBadge(order.status)}
@@ -384,13 +418,13 @@ export default function PayinTasksPage() {
 
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
-                    <p className="text-xs text-gray-600">代收金额</p>
+                    <p className="text-xs text-gray-600">{t('tasks.payin.payinAmount')}</p>
                     <p className="font-bold text-gray-900">
                       {formatCurrency(order.amount)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-600">任务奖励</p>
+                    <p className="text-xs text-gray-600">{t('tasks.payin.reward')}</p>
                     <p className="font-bold text-green-600">
                       +{formatCurrency(order.commission)}
                     </p>
@@ -401,7 +435,7 @@ export default function PayinTasksPage() {
                   className="w-full"
                   onClick={() => setSelectedOrder(order)}
                 >
-                  查看详情并领取
+                  {t('tasks.payin.viewDetails')} & {t('tasks.payin.claim')}
                 </Button>
               </Card>
             ))}
