@@ -20,6 +20,7 @@ export async function GET() {
     const token = generateToken({
       userId: user.id,
       phone: user.phone,
+      inviteCode: user.invite_code || '',
     });
 
     return NextResponse.json({
