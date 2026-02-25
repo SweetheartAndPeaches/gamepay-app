@@ -26,7 +26,16 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
     const limit = parseInt(searchParams.get('limit') || '10');
     const minAmount = parseFloat(searchParams.get('minAmount') || '0');
-    const maxAmount = parseFloat(searchParams.get('maxAmount') || 'Infinity');
+    const maxAmountStr = searchParams.get('maxAmount');
+    const maxAmount = maxAmountStr ? parseFloat(maxAmountStr) : Infinity;
+
+    console.log('[API Available Tasks] Params:', {
+      offset,
+      limit,
+      minAmount,
+      maxAmount,
+      maxAmountStr,
+    });
 
     // 获取用户当前是否有未完成的任务
     const activeTask = await supabaseQueryOne(
@@ -82,11 +91,26 @@ export async function GET(request: NextRequest) {
     const hasMore = tasks.length > limit;
     const validTasks = hasMore ? tasks.slice(0, limit) : tasks;
 
+    console.log('[API Available Tasks] Before filter:', {
+      tasksCount: validTasks.length,
+      amounts: validTasks.map((t: any) => t.amount),
+      maxAmount,
+    });
+
     // 过滤掉已过期的任务和超出最大金额的任务
     const filteredTasks = validTasks.filter((task: any) => {
       const isNotExpired = new Date(task.expires_at) > new Date();
-      const isInAmountRange = task.amount <= maxAmount;
-      return isNotExpired && isInAmountRange;
+      const isAboveMinAmount = task.amount >= minAmount;
+      const isBelowMaxAmount = maxAmount === Infinity || task.amount <= maxAmount;
+      
+      console.log(`[Filter Task] Order: ${task.order_no}, Amount: ${task.amount}, Min: ${minAmount}, Max: ${maxAmount}, Valid: ${isNotExpired && isAboveMinAmount && isBelowMaxAmount}`);
+      
+      return isNotExpired && isAboveMinAmount && isBelowMaxAmount;
+    });
+
+    console.log('[API Available Tasks] After filter:', {
+      tasksCount: filteredTasks.length,
+      amounts: filteredTasks.map((t: any) => t.amount),
     });
 
     // 如果过滤后的任务数为 0，且还有更多数据，需要继续查询下一页
