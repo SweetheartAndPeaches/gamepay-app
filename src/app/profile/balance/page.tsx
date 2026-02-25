@@ -308,7 +308,7 @@ export default function BalanceHistoryPage() {
                             </span>
                           </div>
                           {record.description && (
-                            <p className="text-sm text-gray-600 truncate mb-1">
+                            <p className="text-sm text-gray-600 line-clamp-2 mb-1">
                               {record.description}
                             </p>
                           )}
