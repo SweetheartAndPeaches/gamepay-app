@@ -51,7 +51,7 @@ const AMOUNT_RANGES = [
 
 export default function PayoutTasksPage() {
   const { t, formatCurrency } = useI18n();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, token } = useAuth();
   const router = useRouter();
 
   const [activeTab, setActiveTab] = useState('hall');
@@ -293,6 +293,30 @@ export default function PayoutTasksPage() {
     }
   };
 
+  // 检查并同步余额
+  const checkAndSyncBalance = async () => {
+    try {
+      const response = await authFetch('/api/balance/check');
+      const data: ApiResponse = await response.json();
+
+      if (data.success && !data.data.isConsistent) {
+        console.log('[Balance] 余额不一致，自动同步', data.data);
+        const syncResponse = await authFetch('/api/balance/sync', {
+          method: 'POST',
+        });
+        const syncData: ApiResponse = await syncResponse.json();
+
+        if (syncData.success) {
+          console.log('[Balance] 余额同步成功', syncData.data);
+          // 提示用户重新登录以获取最新余额
+          toast.info('余额已自动同步，请刷新页面查看最新余额');
+        }
+      }
+    } catch (error) {
+      console.error('[Balance] 同步余额失败:', error);
+    }
+  };
+
   // 领取任务
   const handleClaim = async (orderId: string) => {
     try {
@@ -361,6 +385,7 @@ export default function PayoutTasksPage() {
     if (isAuthenticated) {
       fetchAvailableTasks();
       fetchBalanceStatistics();
+      checkAndSyncBalance(); // 检查并同步余额
     }
   }, [isAuthenticated]);
 
