@@ -69,10 +69,13 @@ export async function GET(request: NextRequest) {
       status: 'pending',
     };
 
-    // 添加金额范围筛选
-    if (minAmount > 0) {
+    // 添加金额范围筛选（数据库层面）
+    // 注意：Supabase REST API 会自动处理数字比较，但我们需要确保 minAmount 是数字
+    if (minAmount > 0 && isFinite(minAmount)) {
       filter.amount = `gte.${minAmount}`;
     }
+
+    console.log('[API Available Tasks] Query filter:', filter);
 
     const tasks = await supabaseQuery(
       'orders',
@@ -100,10 +103,11 @@ export async function GET(request: NextRequest) {
     // 过滤掉已过期的任务和超出最大金额的任务
     const filteredTasks = validTasks.filter((task: any) => {
       const isNotExpired = new Date(task.expires_at) > new Date();
-      const isAboveMinAmount = task.amount >= minAmount;
-      const isBelowMaxAmount = maxAmount === Infinity || task.amount <= maxAmount;
+      const taskAmount = parseFloat(task.amount);
+      const isAboveMinAmount = taskAmount >= minAmount;
+      const isBelowMaxAmount = maxAmount === Infinity || taskAmount <= maxAmount;
       
-      console.log(`[Filter Task] Order: ${task.order_no}, Amount: ${task.amount}, Min: ${minAmount}, Max: ${maxAmount}, Valid: ${isNotExpired && isAboveMinAmount && isBelowMaxAmount}`);
+      console.log(`[Filter Task] Order: ${task.order_no}, Amount: ${task.amount} (${typeof task.amount}), Parsed: ${taskAmount}, Min: ${minAmount}, Max: ${maxAmount}, Valid: ${isNotExpired && isAboveMinAmount && isBelowMaxAmount}`);
       
       return isNotExpired && isAboveMinAmount && isBelowMaxAmount;
     });

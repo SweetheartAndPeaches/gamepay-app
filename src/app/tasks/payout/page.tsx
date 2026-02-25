@@ -134,8 +134,11 @@ export default function PayoutTasksPage() {
       const minAmount = amountRange?.min ?? 0;
       const maxAmount = amountRange?.max ?? Infinity;
 
+      // 构建 URL 参数，如果 maxAmount 是 Infinity，则不传这个参数
+      const maxAmountParam = maxAmount === Infinity ? '' : `&maxAmount=${maxAmount}`;
+      
       const response = await authFetch(
-        `/api/tasks/payout/available?offset=${loadMore ? offsetRef.current : offset}&limit=${limit}&minAmount=${minAmount}&maxAmount=${maxAmount}`
+        `/api/tasks/payout/available?offset=${loadMore ? offsetRef.current : offset}&limit=${limit}&minAmount=${minAmount}${maxAmountParam}`
       );
       const data: ApiResponse = await response.json();
 
@@ -143,9 +146,13 @@ export default function PayoutTasksPage() {
         loadMore,
         offset: loadMore ? offsetRef.current : offset,
         limit,
+        minAmount,
+        maxAmount,
+        selectedAmountRange,
         success: data.success,
         canClaim: data.data?.canClaim,
         tasksCount: data.data?.tasks?.length,
+        taskAmounts: data.data?.tasks?.map((t: Order) => t.amount),
         hasMore: data.data?.hasMore,
       });
 
