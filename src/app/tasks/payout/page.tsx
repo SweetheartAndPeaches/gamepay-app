@@ -203,11 +203,19 @@ export default function PayoutTasksPage() {
         setHasMore(data.data.hasMore || false);
 
         // 如果用户有未完成的任务，添加到已领取列表
-        // 只有当 skipSetActiveTab 为 false 时才自动切换（避免循环切换）
-        if (data.data.activeTask && !skipSetActiveTab) {
+        if (data.data.activeTask) {
           setClaimedTasks([data.data.activeTask]);
           setActiveTask(data.data.activeTask);
-          setActiveTab('claimed');
+          
+          // 只有当 skipSetActiveTab 为 false 时才自动切换到已领取 Tab（避免循环切换）
+          if (!skipSetActiveTab) {
+            // 先刷新已领取任务数据，确保显示最新的数据
+            await fetchClaimedTasks();
+            // 设置跳过刷新标志，避免 useEffect 重复调用
+            setSkipRefreshClaimed(true);
+            // 然后切换到已领取 Tab
+            setActiveTab('claimed');
+          }
         }
       } else {
         toast.error(data.message || '获取任务列表失败');
@@ -431,6 +439,19 @@ export default function PayoutTasksPage() {
       }, 100);
     }
   }, [activeTab]);
+
+  // 切换到已领取 Tab 时，如果设置了跳过刷新标志，则跳过本次刷新
+  useEffect(() => {
+    if (activeTab === 'claimed' && isAuthenticated) {
+      // 如果设置了跳过刷新标志，则跳过本次刷新并重置标志
+      if (skipRefreshClaimed) {
+        setSkipRefreshClaimed(false);
+        return;
+      }
+      // 从后端重新获取已领取任务
+      fetchClaimedTasks();
+    }
+  }, [activeTab, isAuthenticated]);
 
   // 金额范围改变时重新加载任务列表
   useEffect(() => {
