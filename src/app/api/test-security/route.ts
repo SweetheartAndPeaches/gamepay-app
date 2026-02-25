@@ -4,7 +4,7 @@ import { supabaseQuery } from '@/storage/database/supabase-rest';
 export async function GET() {
   try {
     // 测试数据库连接并检查是否使用了 SERVICE_ROLE_KEY
-    const { url, apiKey } = (() => {
+    const { url, apiKey, useServiceRole } = (() => {
       const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
       const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

@@ -4,6 +4,7 @@ import { supabaseQuery } from '@/storage/database/supabase-rest';
 export async function GET() {
   try {
     // 测试数据库连接
+    console.log('[test-rest] Starting query...');
     const tasks = await supabaseQuery('orders', {
       filter: {
         type: 'payout',
@@ -11,6 +12,7 @@ export async function GET() {
       },
       limit: 5,
     });
+    console.log('[test-rest] Query result:', tasks);
 
     return NextResponse.json({
       success: true,
@@ -21,6 +23,7 @@ export async function GET() {
       },
     });
   } catch (error: any) {
+    console.error('[test-rest] Error:', error);
     return NextResponse.json({
       success: false,
       message: 'REST API connection failed',
