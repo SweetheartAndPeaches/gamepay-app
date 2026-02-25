@@ -126,7 +126,6 @@ export async function supabaseQuery<T = any>(
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'Accept-Profile': 'public',
-      'Content-Profile': 'public',
     },
   });
 
@@ -173,7 +172,6 @@ export async function supabaseInsert<T = any>(
       'Content-Type': 'application/json',
       'Prefer': 'return=representation',
       'Accept-Profile': 'public',
-      'Content-Profile': 'public',
     },
     body: JSON.stringify(data),
   });
@@ -195,7 +193,7 @@ export async function supabaseUpdate<T = any>(
   data: any,
   filter: Record<string, any>
 ): Promise<T[]> {
-  const { url, apiKey, useServiceRole } = getConfig();
+  const { url, apiKey } = getConfig();
 
   const queryParams = new URLSearchParams();
 
@@ -206,21 +204,15 @@ export async function supabaseUpdate<T = any>(
     }
   });
 
-  // 使用 SERVICE_ROLE_KEY 时，明确指定 schema 为 public
-  const headers: HeadersInit = {
-    'apikey': apiKey,
-    'Authorization': `Bearer ${apiKey}`,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=representation',
-    'Accept-Profile': 'public',
-  };
-
-  // 对于更新操作，可能还需要 Content-Profile
-  headers['Content-Profile'] = 'public';
-
   const response = await fetch(`${url}/rest/v1/${table}?${queryParams.toString()}`, {
     method: 'PATCH',
-    headers,
+    headers: {
+      'apikey': apiKey,
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      'Accept-Profile': 'public',
+    },
     body: JSON.stringify(data),
   });
 
