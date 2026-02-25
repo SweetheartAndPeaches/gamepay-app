@@ -68,6 +68,7 @@ export default function PayoutTasksPage() {
     totalIncome: 0,
     totalOutcome: 0,
   });
+  const [skipRefreshClaimed, setSkipRefreshClaimed] = useState(false);
 
   // 分页状态
   const [offset, setOffset] = useState(0);
@@ -351,9 +352,11 @@ export default function PayoutTasksPage() {
         setCanClaim(false);
         // 设置当前任务
         setActiveTask(data.data);
-        // 先刷新已领取任务列表
-        await fetchClaimedTasks();
-        // 再切换到已领取标签页
+        // 手动添加到已领取任务列表
+        setClaimedTasks([data.data]);
+        // 设置跳过刷新标志，避免 useEffect 重复调用
+        setSkipRefreshClaimed(true);
+        // 切换到已领取标签页
         setActiveTab('claimed');
       } else {
         toast.error(data.message || '领取任务失败');
@@ -405,6 +408,11 @@ export default function PayoutTasksPage() {
 
   useEffect(() => {
     if (activeTab === 'claimed' && isAuthenticated) {
+      // 如果设置了跳过刷新标志，则跳过本次刷新并重置标志
+      if (skipRefreshClaimed) {
+        setSkipRefreshClaimed(false);
+        return;
+      }
       fetchClaimedTasks();
     }
   }, [activeTab, isAuthenticated]);
