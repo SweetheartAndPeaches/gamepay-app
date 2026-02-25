@@ -64,6 +64,10 @@ export default function PayoutTasksPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [canClaim, setCanClaim] = useState(true);
   const [selectedAmountRange, setSelectedAmountRange] = useState('all');
+  const [balanceStats, setBalanceStats] = useState({
+    totalIncome: 0,
+    totalOutcome: 0,
+  });
 
   // 分页状态
   const [offset, setOffset] = useState(0);
@@ -102,10 +106,8 @@ export default function PayoutTasksPage() {
   const statistics = {
     availableBalance: user?.balance || 0,
     frozenBalance: user?.frozenBalance || 0,
-    totalIncome: claimedTasks
-      .filter((task) => task.status === 'completed')
-      .reduce((sum, task) => sum + task.amount + task.commission, 0),
-    totalOutcome: 0, // 暂无支出数据
+    totalIncome: balanceStats.totalIncome,
+    totalOutcome: balanceStats.totalOutcome,
   };
 
   // 格式化统计数据的金额
@@ -277,6 +279,20 @@ export default function PayoutTasksPage() {
     }
   };
 
+  // 获取余额统计数据
+  const fetchBalanceStatistics = async () => {
+    try {
+      const response = await authFetch('/api/balance/statistics');
+      const data: ApiResponse = await response.json();
+
+      if (data.success) {
+        setBalanceStats(data.data);
+      }
+    } catch (error) {
+      console.error('Fetch balance statistics error:', error);
+    }
+  };
+
   // 领取任务
   const handleClaim = async (orderId: string) => {
     try {
@@ -344,6 +360,7 @@ export default function PayoutTasksPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchAvailableTasks();
+      fetchBalanceStatistics();
     }
   }, [isAuthenticated]);
 
@@ -638,6 +655,8 @@ export default function PayoutTasksPage() {
 
                   if (data.success) {
                     toast.success(`任务完成！订单金额 ${formatCurrency(data.data.orderAmount)} + 奖励 ${formatCurrency(data.data.commission)} = 总计 ${formatCurrency(data.data.totalReward)}`);
+                    // 刷新余额统计
+                    fetchBalanceStatistics();
                   } else {
                     toast.error(data.message || '完成任务失败');
                   }
