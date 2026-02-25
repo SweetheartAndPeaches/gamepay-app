@@ -209,11 +209,10 @@ export default function PayoutTasksPage() {
           
           // 只有当 skipSetActiveTab 为 false 时才自动切换到已领取 Tab（避免循环切换）
           if (!skipSetActiveTab) {
-            // 先刷新已领取任务数据，确保显示最新的数据
-            await fetchClaimedTasks();
-            // 设置跳过刷新标志，避免 useEffect 重复调用
+            // 直接使用 activeTask 数据，不需要重新刷新
+            // 设置跳过刷新标志，避免 useEffect 重复调用 fetchClaimedTasks
             setSkipRefreshClaimed(true);
-            // 然后切换到已领取 Tab
+            // 切换到已领取 Tab
             setActiveTab('claimed');
           }
         }
