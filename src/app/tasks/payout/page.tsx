@@ -76,6 +76,7 @@ export default function PayoutTasksPage() {
   const loadingMoreRef = useRef(loadingMore);
   const offsetRef = useRef(offset);
   const loadedOrderIdsRef = useRef<Set<string>>(new Set());
+  const selectedAmountRangeRef = useRef(selectedAmountRange);
   
   // 同步 loading 状态到 ref
   useEffect(() => {
@@ -91,6 +92,11 @@ export default function PayoutTasksPage() {
   useEffect(() => {
     offsetRef.current = offset;
   }, [offset]);
+
+  // 同步 selectedAmountRange 到 ref
+  useEffect(() => {
+    selectedAmountRangeRef.current = selectedAmountRange;
+  }, [selectedAmountRange]);
 
   // 统计数据
   const statistics = {
@@ -120,6 +126,9 @@ export default function PayoutTasksPage() {
       if (isLoadingRef.current) return;
       isLoadingRef.current = true;
 
+      // 保存请求时的金额范围，用于后续验证
+      const requestAmountRange = selectedAmountRangeRef.current;
+
       if (!loadMore) {
         setLoading(true);
         setOffset(0);
@@ -129,8 +138,8 @@ export default function PayoutTasksPage() {
         setLoadingMore(true);
       }
 
-      // 获取当前选中的金额范围
-      const amountRange = AMOUNT_RANGES.find(range => range.value === selectedAmountRange);
+      // 获取当前选中的金额范围（使用 ref 确保总是最新的值）
+      const amountRange = AMOUNT_RANGES.find(range => range.value === selectedAmountRangeRef.current);
       const minAmount = amountRange?.min ?? 0;
       const maxAmount = amountRange?.max ?? Infinity;
 
@@ -142,13 +151,22 @@ export default function PayoutTasksPage() {
       );
       const data: ApiResponse = await response.json();
 
+      // 验证金额范围是否仍然匹配（防止在切换金额范围时追加旧数据）
+      if (requestAmountRange !== selectedAmountRangeRef.current) {
+        console.log('[Fetch Available Tasks] Amount range changed, discarding results', {
+          requestAmountRange,
+          currentAmountRange: selectedAmountRangeRef.current,
+        });
+        return;
+      }
+
       console.log('[Fetch Available Tasks]', {
         loadMore,
         offset: loadMore ? offsetRef.current : offset,
         limit,
         minAmount,
         maxAmount,
-        selectedAmountRange,
+        selectedAmountRange: selectedAmountRangeRef.current,
         success: data.success,
         canClaim: data.data?.canClaim,
         tasksCount: data.data?.tasks?.length,
@@ -334,7 +352,12 @@ export default function PayoutTasksPage() {
   // 金额范围改变时重新加载任务列表
   useEffect(() => {
     if (isAuthenticated && activeTab === 'hall') {
-      fetchAvailableTasks();
+      // 重置 offset 和任务列表
+      setOffset(0);
+      setAvailableTasks([]);
+      loadedOrderIdsRef.current = new Set();
+      // 重新加载任务列表
+      fetchAvailableTasks(false);
     }
   }, [selectedAmountRange]);
 
