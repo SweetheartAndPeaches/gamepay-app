@@ -50,10 +50,30 @@ export default function TaskDetailDialog({
 
   if (!order) return null;
 
-  // 解析支付账户信息
-  const paymentInfo = order.payment_account
-    ? JSON.parse(order.payment_account)
-    : null;
+  // 解析支付账户信息（支持 JSON 格式和纯文本格式）
+  const paymentInfo = (() => {
+    if (!order.payment_account) return null;
+
+    try {
+      // 尝试解析为 JSON
+      const parsed = JSON.parse(order.payment_account);
+
+      // 如果解析成功，检查是否是对象
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed;
+      }
+
+      // 如果是字符串，直接返回作为账号
+      if (typeof parsed === 'string') {
+        return { account: parsed };
+      }
+
+      return null;
+    } catch {
+      // 如果解析失败，将原始值作为账号
+      return { account: order.payment_account };
+    }
+  })();
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
