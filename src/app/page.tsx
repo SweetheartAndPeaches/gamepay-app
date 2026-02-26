@@ -84,12 +84,10 @@ export default function LoginPage() {
       {/* 头部 */}
       <div className="bg-white shadow-sm">
         <div className="max-w-md mx-auto px-4 py-3 sm:py-4 flex justify-between items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-            {t('common.appName')}
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 min-w-0 flex-1">
+            <span className="block truncate">{t('common.appName')}</span>
           </h1>
-          <div className="flex-shrink-0">
-            <LanguageSelector />
-          </div>
+          <LanguageSelector />
         </div>
       </div>
 
