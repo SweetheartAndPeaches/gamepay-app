@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Trash2, Edit, QrCode, CreditCard, Smartphone, Wallet, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, Edit, QrCode, CreditCard, Smartphone } from 'lucide-react';
 import { ACCOUNT_TYPES } from '@/lib/constants';
 import { useI18n } from '@/i18n/context';
 
@@ -19,12 +19,6 @@ interface PaymentAccount {
   accountType: string;
   accountInfo: Record<string, any>;
   isActive: boolean;
-  // 代收相关字段
-  payinEnabled?: boolean;
-  payinMaxAmount?: number;
-  payinAllocatedAmount?: number;
-  payinEarnedCommission?: number;
-  payinTotalCount?: number;
 }
 
 export default function AccountsPage() {
@@ -42,9 +36,6 @@ export default function AccountsPage() {
     accountNumber: '',
     bankName: '',
     qrCode: null as File | null,
-    // 代收设置
-    payinEnabled: false,
-    payinMaxAmount: '',
   });
 
   // 账户类型配置
@@ -96,8 +87,6 @@ export default function AccountsPage() {
         accountNumber: account.accountInfo.accountNumber || '',
         bankName: account.accountInfo.bankName || '',
         qrCode: null,
-        payinEnabled: account.payinEnabled || false,
-        payinMaxAmount: account.payinMaxAmount ? String(account.payinMaxAmount) : '',
       });
     } else {
       setEditingAccount(null);
@@ -107,8 +96,6 @@ export default function AccountsPage() {
         accountNumber: '',
         bankName: '',
         qrCode: null,
-        payinEnabled: false,
-        payinMaxAmount: '',
       });
     }
     setDialogOpen(true);
@@ -123,8 +110,6 @@ export default function AccountsPage() {
       accountNumber: '',
       bankName: '',
       qrCode: null,
-      payinEnabled: false,
-      payinMaxAmount: '',
     });
   };
 
@@ -138,12 +123,6 @@ export default function AccountsPage() {
       formDataToSend.append('accountNumber', formData.accountNumber);
       formDataToSend.append('bankName', formData.bankName);
       formDataToSend.append('usageType', currentTab);
-
-      // 如果是代收账户，添加代收设置
-      if (currentTab === 'payin') {
-        formDataToSend.append('payinEnabled', String(formData.payinEnabled));
-        formDataToSend.append('payinMaxAmount', formData.payinMaxAmount || '0');
-      }
 
       if (formData.qrCode) {
         formDataToSend.append('qrCode', formData.qrCode);
@@ -206,9 +185,6 @@ export default function AccountsPage() {
   const renderPayinAccountCard = (account: PaymentAccount) => {
     const info = account.accountInfo;
     const isQrcode = account.accountType.includes('qrcode');
-    const remainingAmount = account.payinMaxAmount && account.payinMaxAmount > 0
-      ? account.payinMaxAmount - (account.payinAllocatedAmount || 0)
-      : null;
 
     return (
       <Card key={account.id} className="p-4">
@@ -220,11 +196,6 @@ export default function AccountsPage() {
               </span>
               {!account.isActive && (
                 <span className="text-xs text-red-500">已禁用</span>
-              )}
-              {account.payinEnabled && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                  代收中
-                </span>
               )}
             </div>
 
@@ -264,52 +235,6 @@ export default function AccountsPage() {
             </Button>
           </div>
         </div>
-
-        {/* 代收统计 */}
-        {account.payinEnabled && (
-          <div className="mt-3 pt-3 border-t">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Wallet className="w-4 h-4 text-blue-500" />
-                <span className="text-gray-600">已分配：</span>
-                <span className="font-medium">{formatCurrency(account.payinAllocatedAmount || 0)}</span>
-              </div>
-              {remainingAmount !== null && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Wallet className="w-4 h-4 text-green-500" />
-                  <span className="text-gray-600">剩余：</span>
-                  <span className="font-medium">{formatCurrency(remainingAmount)}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="w-4 h-4 text-orange-500" />
-                <span className="text-gray-600">佣金：</span>
-                <span className="font-medium">{formatCurrency(account.payinEarnedCommission || 0)}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <TrendingUp className="w-4 h-4 text-purple-500" />
-                <span className="text-gray-600">完成：</span>
-                <span className="font-medium">{account.payinTotalCount || 0} 单</span>
-              </div>
-            </div>
-            {account.payinMaxAmount && account.payinMaxAmount > 0 && (
-              <div className="mt-2">
-                <div className="flex justify-between text-xs text-gray-600 mb-1">
-                  <span>使用进度</span>
-                  <span>{((account.payinAllocatedAmount || 0) / account.payinMaxAmount * 100).toFixed(0)}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full transition-all"
-                    style={{
-                      width: `${Math.min(100, ((account.payinAllocatedAmount || 0) / account.payinMaxAmount * 100))}%`
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {isQrcode && info.qrCodeUrl && (
           <div className="mt-2">
@@ -556,51 +481,6 @@ export default function AccountsPage() {
                     </p>
                   )}
                 </div>
-              )}
-
-              {/* 代收设置（仅代收账户显示） */}
-              {currentTab === 'payin' && (
-                <>
-                  <div className="border-t pt-4">
-                    <h3 className="font-medium text-gray-900 mb-3">代收设置</h3>
-
-                    <div className="flex items-center justify-between py-2">
-                      <div>
-                        <Label htmlFor="payinEnabled">启用代收</Label>
-                        <p className="text-xs text-gray-500 mt-1">
-                          启用后可以接收代收任务
-                        </p>
-                      </div>
-                      <Switch
-                        id="payinEnabled"
-                        checked={formData.payinEnabled}
-                        onCheckedChange={(checked) =>
-                          setFormData({ ...formData, payinEnabled: checked })
-                        }
-                      />
-                    </div>
-
-                    {formData.payinEnabled && (
-                      <div className="pt-2">
-                        <Label htmlFor="payinMaxAmount">代收金额上限</Label>
-                        <Input
-                          id="payinMaxAmount"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={formData.payinMaxAmount}
-                          onChange={(e) =>
-                            setFormData({ ...formData, payinMaxAmount: e.target.value })
-                          }
-                          placeholder="0 表示无限制"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          0 表示无限制，可使用全部余额
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </>
               )}
 
               <DialogFooter>
