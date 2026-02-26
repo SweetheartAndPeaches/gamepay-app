@@ -26,9 +26,9 @@ export function LanguageSelector() {
       open={open}
       onOpenChange={setOpen}
     >
-      <SelectTrigger className="w-[140px]">
-        <Languages className="w-4 h-4 mr-2" />
-        <SelectValue placeholder={localeNames[locale]}>
+      <SelectTrigger className="w-[120px] sm:w-[140px]">
+        <Languages className="w-4 h-4 mr-2 flex-shrink-0" />
+        <SelectValue placeholder={localeNames[locale]} className="truncate">
           {localeNames[locale]}
         </SelectValue>
       </SelectTrigger>
