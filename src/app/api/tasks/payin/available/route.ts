@@ -48,7 +48,6 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('user_id', payload.userId)
       .eq('is_active', true)
-      .eq('payin_enabled', true)
       .in('account_type', ['wechat_qrcode', 'alipay_qrcode', 'alipay_account', 'bank_card']);
 
     if (accountsError) {
@@ -59,7 +58,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (!payinAccounts || payinAccounts.length === 0) {
+    // 过滤出使用类型为 payin 的账户
+    const filteredPayinAccounts = payinAccounts?.filter((account: any) => {
+      const usageType = account.account_info?.usage_type;
+      // 如果设置了 usage_type，则直接比较
+      if (usageType) {
+        return usageType === 'payin';
+      }
+      // 如果没有设置 usage_type，则根据 payin_enabled 判断（兼容旧数据）
+      return account.payin_enabled === true;
+    }) || [];
+
+    if (!filteredPayinAccounts || filteredPayinAccounts.length === 0) {
       return NextResponse.json({
         success: true,
         message: '请先设置代收账户并启用代收功能',
@@ -70,6 +80,16 @@ export async function GET(request: NextRequest) {
           accounts: [],
         },
       });
+    }
+
+    // 更新旧数据：如果账户的 usage_type 为 payin 但 payin_enabled 为 false，则自动启用
+    for (const account of filteredPayinAccounts) {
+      if (account.payin_enabled === false && account.account_info?.usage_type === 'payin') {
+        await client
+          .from('payment_accounts')
+          .update({ payin_enabled: true })
+          .eq('id', account.id);
+      }
     }
 
     // 获取用户余额
@@ -115,7 +135,7 @@ export async function GET(request: NextRequest) {
           userBalance,
           activeTask,
           tasks: [],
-          accounts: payinAccounts,
+          accounts: filteredPayinAccounts,
         },
       });
     }
@@ -124,13 +144,13 @@ export async function GET(request: NextRequest) {
     // 如果所有账户的 payin_max_amount 都是 0，则使用用户全部余额
     // 否则，使用所有账户的剩余金额之和
     let availableAmount = 0;
-    const hasLimitedAccounts = payinAccounts.some(
+    const hasLimitedAccounts = filteredPayinAccounts.some(
       (acc: any) => acc.payin_max_amount && acc.payin_max_amount > 0
     );
 
     if (hasLimitedAccounts) {
       // 计算所有账户的剩余金额之和
-      availableAmount = payinAccounts.reduce((sum: number, acc: any) => {
+      availableAmount = filteredPayinAccounts.reduce((sum: number, acc: any) => {
         const maxAmount = acc.payin_max_amount || 0;
         const allocatedAmount = acc.payin_allocated_amount || 0;
         return sum + (maxAmount - allocatedAmount);
@@ -169,7 +189,7 @@ export async function GET(request: NextRequest) {
         userBalance,
         availableAmount,
         tasks: tasks || [],
-        accounts: payinAccounts,
+        accounts: filteredPayinAccounts,
       },
     });
   } catch (error) {

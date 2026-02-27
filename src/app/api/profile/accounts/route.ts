@@ -289,9 +289,9 @@ export async function POST(request: NextRequest) {
         account_type: accountType,
         account_info: accountInfo,
         is_active: true,
-        // 代收设置
-        payin_enabled: usageType === 'payin' ? payinEnabled : false,
-        payin_max_amount: usageType === 'payin' ? payinMaxAmount : 0,
+        // 代收设置：代收账户默认启用，金额上限默认为0（无限制）
+        payin_enabled: usageType === 'payin' ? true : false,
+        payin_max_amount: usageType === 'payin' ? 0 : 0,
       })
       .select()
       .single();
