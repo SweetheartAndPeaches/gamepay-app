@@ -417,11 +417,18 @@ export default function PayinTasksPage() {
                 {accounts.map((account) => {
                   const isSelected = selectedAccountIds.includes(account.id);
                   return (
-                    <button
+                    <div
                       key={account.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       onClick={() => toggleAccountSelection(account.id)}
-                      className={`w-full p-3 border rounded-lg text-left transition-colors flex items-center gap-3 ${
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleAccountSelection(account.id);
+                        }
+                      }}
+                      className={`w-full p-3 border rounded-lg text-left transition-colors flex items-center gap-3 cursor-pointer ${
                         isSelected
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-gray-200 hover:border-gray-300'
@@ -446,7 +453,7 @@ export default function PayinTasksPage() {
                       {isSelected && (
                         <CheckCircle className="w-5 h-5 text-blue-600" />
                       )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
