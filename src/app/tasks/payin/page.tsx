@@ -6,6 +6,7 @@ import MainLayout from '@/components/MainLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from '@/i18n/context';
 import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield, Upload, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -48,7 +49,7 @@ export default function PayinTasksPage() {
   const [pageState, setPageState] = useState<PageState>('idle');
   const [userBalance, setUserBalance] = useState(0);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState('');
+  const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [amount, setAmount] = useState('');
   const [activeOrder, setActiveOrder] = useState<PayinOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,10 +109,21 @@ export default function PayinTasksPage() {
     }
   };
 
+  // 切换账户选择状态
+  const toggleAccountSelection = (accountId: string) => {
+    setSelectedAccountIds(prev => {
+      if (prev.includes(accountId)) {
+        return prev.filter(id => id !== accountId);
+      } else {
+        return [...prev, accountId];
+      }
+    });
+  };
+
   // 创建代收订单
   const handleCreateOrder = async () => {
-    if (!selectedAccountId) {
-      toast.error('请选择代收账户');
+    if (selectedAccountIds.length === 0) {
+      toast.error('请选择至少一个代收账户');
       return;
     }
 
@@ -141,7 +153,7 @@ export default function PayinTasksPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          accountId: selectedAccountId,
+          accountIds: selectedAccountIds,
           amount: amountValue,
           paymentMethod: 'COLOMBIA_QR', // 默认使用哥伦比亚QR码
         }),
@@ -154,7 +166,7 @@ export default function PayinTasksPage() {
         setActiveOrder(data.data.order);
         setPageState('paying');
         setAmount('');
-        setSelectedAccountId('');
+        setSelectedAccountIds([]);
       } else {
         toast.error(data.message || '创建订单失败');
         setPageState('idle');
@@ -385,35 +397,56 @@ export default function PayinTasksPage() {
           <Card className="p-4">
             <h2 className="text-lg font-semibold mb-4">创建代收订单</h2>
 
-            {/* 选择代收账户 */}
+            {/* 选择代收账户 - 支持多选 */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                选择代收账户
+                选择代收账户（可多选）
+                <span className="text-blue-600 ml-2">
+                  已选择 {selectedAccountIds.length} 个账户
+                </span>
               </label>
               <div className="space-y-2">
-                {accounts.map((account) => (
-                  <button
-                    key={account.id}
-                    type="button"
-                    onClick={() => setSelectedAccountId(account.id)}
-                    className={`w-full p-3 border rounded-lg text-left transition-colors ${
-                      selectedAccountId === account.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="font-medium text-gray-900">
-                      {account.account_type === 'wechat_qrcode' && '微信收款码'}
-                      {account.account_type === 'alipay_qrcode' && '支付宝收款码'}
-                      {account.account_type === 'alipay_account' && '支付宝账号'}
-                      {account.account_type === 'bank_card' && '银行卡'}
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {account.account_number}
-                    </div>
-                  </button>
-                ))}
+                {accounts.map((account) => {
+                  const isSelected = selectedAccountIds.includes(account.id);
+                  return (
+                    <button
+                      key={account.id}
+                      type="button"
+                      onClick={() => toggleAccountSelection(account.id)}
+                      className={`w-full p-3 border rounded-lg text-left transition-colors flex items-center gap-3 ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <Checkbox
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="pointer-events-none"
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">
+                          {account.account_type === 'wechat_qrcode' && '微信收款码'}
+                          {account.account_type === 'alipay_qrcode' && '支付宝收款码'}
+                          {account.account_type === 'alipay_account' && '支付宝账号'}
+                          {account.account_type === 'bank_card' && '银行卡'}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          {account.account_number}
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <CheckCircle className="w-5 h-5 text-blue-600" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+              {selectedAccountIds.length === 0 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  请至少选择一个代收账户
+                </p>
+              )}
             </div>
 
             {/* 设置代收金额 */}
@@ -444,7 +477,8 @@ export default function PayinTasksPage() {
               <ul className="text-xs text-yellow-700 mt-1 list-disc list-inside space-y-1">
                 <li>创建订单后会冻结相应的余额</li>
                 <li>订单有效期为 30 分钟</li>
-                <li>请检查账户是否收到款项后上传凭证</li>
+                <li>您可以同时使用多个代收账户接收款项</li>
+                <li>请检查任一账户是否收到款项后上传凭证</li>
                 <li>佣金为订单金额的 5%</li>
               </ul>
             </div>
@@ -453,7 +487,7 @@ export default function PayinTasksPage() {
             <Button
               className="w-full"
               onClick={handleCreateOrder}
-              disabled={isSubmitting || !selectedAccountId || !amount}
+              disabled={isSubmitting || selectedAccountIds.length === 0 || !amount}
             >
               {isSubmitting ? (
                 <>
@@ -524,7 +558,7 @@ export default function PayinTasksPage() {
                 <strong>操作指引：</strong>
               </p>
               <ol className="text-xs text-blue-700 mt-1 list-decimal list-inside space-y-1">
-                <li>检查您的代收账户是否收到款项</li>
+                <li>检查您的任一代收账户是否收到款项</li>
                 <li>上传支付凭证（截图或转账记录）</li>
                 <li>确认已收到款项，系统将发放佣金</li>
               </ol>

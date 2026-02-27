@@ -10,8 +10,8 @@ import { isPayinConfigValid } from '@/lib/payin-config';
  * 用户选择代收账户和金额后，调用此API创建代收订单
  */
 interface CreateOrderRequest {
-  /** 代收账户ID */
-  accountId: string;
+  /** 代收账户ID列表（支持多选） */
+  accountIds: string[];
   /** 代收金额（单位：元） */
   amount: number;
   /** 支付方式（如：COLOMBIA_QR、MILURU_QR） */
@@ -38,12 +38,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body: CreateOrderRequest = await request.json();
-    const { accountId, amount, paymentMethod = 'COLOMBIA_QR' } = body;
+    const { accountIds, amount, paymentMethod = 'COLOMBIA_QR' } = body;
 
     // 验证参数
-    if (!accountId) {
+    if (!accountIds || !Array.isArray(accountIds) || accountIds.length === 0) {
       return NextResponse.json(
-        { success: false, message: '代收账户 ID 不能为空' },
+        { success: false, message: '请至少选择一个代收账户' },
         { status: 400 }
       );
     }
@@ -125,22 +125,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 检查代收账户是否属于当前用户
-    const { data: account, error: accountError } = await client
+    // 检查所有代收账户是否属于当前用户
+    const { data: accounts, error: accountsError } = await client
       .from('payment_accounts')
       .select('*')
-      .eq('id', accountId)
+      .in('id', accountIds)
       .eq('user_id', payload.userId)
       .eq('is_active', true)
-      .eq('payin_enabled', true)
-      .single();
+      .eq('payin_enabled', true);
 
-    if (accountError || !account) {
+    if (accountsError || !accounts || accounts.length === 0) {
       return NextResponse.json(
         { success: false, message: '代收账户不存在或未启用代收' },
         { status: 404 }
       );
     }
+
+    // 检查是否所有账户都有效
+    if (accounts.length !== accountIds.length) {
+      return NextResponse.json(
+        { success: false, message: '部分代收账户无效或未启用代收' },
+        { status: 400 }
+      );
+    }
+
+    // 使用第一个账户作为主要账户
+    const primaryAccount = accounts[0];
 
     // 计算佣金（假设佣金率为 5%）
     const commission = amount * 0.05;
@@ -188,7 +198,7 @@ export async function POST(request: NextRequest) {
       .from('payin_orders')
       .insert({
         user_id: payload.userId,
-        account_id: accountId,
+        account_id: primaryAccount.id,
         order_no: orderNo,
         amount: amount,
         commission: commission,
