@@ -168,12 +168,20 @@ export default function PayinTasksPage() {
         setAmount('');
         setSelectedAccountIds([]);
       } else {
-        toast.error(data.message || '创建订单失败');
+        // 处理API返回的错误
+        const errorMessage = data.message || '创建订单失败';
+        console.error('API Error:', errorMessage, { response: data });
+        toast.error(errorMessage);
         setPageState('idle');
       }
     } catch (error) {
+      // 处理网络错误或其他异常
       console.error('Create order error:', error);
-      toast.error('创建订单失败');
+      if (error instanceof TypeError && error.message === 'Failed to fetch') {
+        toast.error('网络连接失败，请检查网络设置');
+      } else {
+        toast.error('创建订单失败，请稍后重试');
+      }
       setPageState('idle');
     } finally {
       setIsSubmitting(false);

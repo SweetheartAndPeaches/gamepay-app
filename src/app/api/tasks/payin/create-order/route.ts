@@ -57,9 +57,15 @@ export async function POST(request: NextRequest) {
 
     // 验证支付平台配置
     if (!isPayinConfigValid()) {
+      console.error('Payin platform config invalid:', {
+        apiUrl: PAYIN_PLATFORM_CONFIG.apiUrl,
+        mchNo: PAYIN_PLATFORM_CONFIG.mchNo ? 'configured' : 'missing',
+        appId: PAYIN_PLATFORM_CONFIG.appId ? 'configured' : 'missing',
+        privateKey: PAYIN_PLATFORM_CONFIG.privateKey ? 'configured' : 'missing',
+      });
       return NextResponse.json(
-        { success: false, message: '支付平台配置不完整，请联系管理员' },
-        { status: 500 }
+        { success: false, message: '支付平台配置不完整，请联系管理员配置支付平台参数' },
+        { status: 400 }
       );
     }
 
