@@ -69,13 +69,28 @@ export async function GET(request: NextRequest) {
       }
     }) || [];
 
+    // 转换字段名：蛇形命名 -> 驼峰命名
+    const transformedAccounts = filteredAccounts.map((account: any) => ({
+      id: account.id,
+      accountType: account.account_type,
+      accountInfo: account.account_info,
+      isActive: account.is_active,
+      payinEnabled: account.payin_enabled,
+      payinMaxAmount: account.payin_max_amount,
+      payinAllocatedAmount: account.payin_allocated_amount,
+      payinEarnedCommission: account.payin_earned_commission,
+      payinTotalCount: account.payin_total_count,
+      createdAt: account.created_at,
+      updatedAt: account.updated_at,
+    }));
+
     // 检查是否超过限制（默认 5 个）
     const maxAccounts = 5;
-    if (filteredAccounts.length >= maxAccounts) {
+    if (transformedAccounts.length >= maxAccounts) {
       return NextResponse.json({
         success: true,
         data: {
-          accounts: filteredAccounts,
+          accounts: transformedAccounts,
           canAdd: false,
           maxAccounts,
           message: `已达到最大账户数量（${maxAccounts}个）`,
@@ -86,7 +101,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        accounts: filteredAccounts,
+        accounts: transformedAccounts,
         canAdd: true,
         maxAccounts,
       },
@@ -294,7 +309,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: '账户添加成功',
-      data: { account: newAccount },
+      data: {
+        account: {
+          id: newAccount.id,
+          accountType: newAccount.account_type,
+          accountInfo: newAccount.account_info,
+          isActive: newAccount.is_active,
+          payinEnabled: newAccount.payin_enabled,
+          payinMaxAmount: newAccount.payin_max_amount,
+          payinAllocatedAmount: newAccount.payin_allocated_amount,
+          payinEarnedCommission: newAccount.payin_earned_commission,
+          payinTotalCount: newAccount.payin_total_count,
+          createdAt: newAccount.created_at,
+          updatedAt: newAccount.updated_at,
+        }
+      },
     });
   } catch (error) {
     console.error('Add account error:', error);

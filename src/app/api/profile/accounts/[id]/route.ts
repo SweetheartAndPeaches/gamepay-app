@@ -50,7 +50,21 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: { account },
+      data: {
+        account: {
+          id: account.id,
+          accountType: account.account_type,
+          accountInfo: account.account_info,
+          isActive: account.is_active,
+          payinEnabled: account.payin_enabled,
+          payinMaxAmount: account.payin_max_amount,
+          payinAllocatedAmount: account.payin_allocated_amount,
+          payinEarnedCommission: account.payin_earned_commission,
+          payinTotalCount: account.payin_total_count,
+          createdAt: account.created_at,
+          updatedAt: account.updated_at,
+        }
+      },
     });
   } catch (error) {
     console.error('Get account error:', error);
@@ -211,7 +225,21 @@ export async function PUT(
     return NextResponse.json({
       success: true,
       message: '账户更新成功',
-      data: { account: updatedAccount },
+      data: {
+        account: {
+          id: updatedAccount.id,
+          accountType: updatedAccount.account_type,
+          accountInfo: updatedAccount.account_info,
+          isActive: updatedAccount.is_active,
+          payinEnabled: updatedAccount.payin_enabled,
+          payinMaxAmount: updatedAccount.payin_max_amount,
+          payinAllocatedAmount: updatedAccount.payin_allocated_amount,
+          payinEarnedCommission: updatedAccount.payin_earned_commission,
+          payinTotalCount: updatedAccount.payin_total_count,
+          createdAt: updatedAccount.created_at,
+          updatedAt: updatedAccount.updated_at,
+        }
+      },
     });
   } catch (error) {
     console.error('Update account error:', error);
