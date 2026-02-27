@@ -16,8 +16,8 @@ import { useI18n } from '@/i18n/context';
 
 interface PaymentAccount {
   id: string;
-  accountType: string;
-  accountInfo: Record<string, any>;
+  accountType?: string;
+  accountInfo?: Record<string, any>;
   isActive: boolean;
 }
 
@@ -99,10 +99,10 @@ export default function AccountsPage() {
     if (account) {
       setEditingAccount(account);
       setFormData({
-        accountType: account.accountType,
-        accountName: account.accountInfo.name || '',
-        accountNumber: account.accountInfo.accountNumber || '',
-        bankName: account.accountInfo.bankName || '',
+        accountType: account.accountType || '',
+        accountName: account.accountInfo?.name || '',
+        accountNumber: account.accountInfo?.accountNumber || '',
+        bankName: account.accountInfo?.bankName || '',
         qrCode: null,
       });
     } else {
@@ -218,8 +218,9 @@ export default function AccountsPage() {
   };
 
   const renderPayinAccountCard = (account: PaymentAccount) => {
-    const info = account.accountInfo;
-    const isQrcode = account.accountType.includes('qrcode');
+    const info = account.accountInfo || {};
+    const accountType = account.accountType || '';
+    const isQrcode = accountType.includes('qrcode');
 
     return (
       <Card key={account.id} className="p-4">
@@ -227,7 +228,7 @@ export default function AccountsPage() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-medium text-gray-900">
-                {getAccountTypeLabel(account.accountType)}
+                {getAccountTypeLabel(accountType)}
               </span>
               {!account.isActive && (
                 <span className="text-xs text-red-500">已禁用</span>
@@ -285,8 +286,9 @@ export default function AccountsPage() {
   };
 
   const renderPayoutAccountCard = (account: PaymentAccount) => {
-    const info = account.accountInfo;
-    const isQrcode = account.accountType.includes('qrcode');
+    const info = account.accountInfo || {};
+    const accountType = account.accountType || '';
+    const isQrcode = accountType.includes('qrcode');
 
     return (
       <Card key={account.id} className="p-4">
@@ -294,7 +296,7 @@ export default function AccountsPage() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <span className="font-medium text-gray-900">
-                {getAccountTypeLabel(account.accountType)}
+                {getAccountTypeLabel(accountType)}
               </span>
               {!account.isActive && (
                 <span className="text-xs text-red-500">已禁用</span>
