@@ -108,8 +108,8 @@ export default function PageHeader({
     )}>
       <div className="px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* 左侧：移动端菜单 + Logo + 主导航 */}
-          <div className="flex items-center gap-4">
+          {/* 左侧：移动端菜单 + 主导航 */}
+          <div className="flex items-center gap-3">
             {/* 移动端菜单按钮 */}
             {showMobileMenu && (
               <Button
@@ -122,28 +122,9 @@ export default function PageHeader({
               </Button>
             )}
 
-            {/* Logo */}
-            <div className="flex items-center gap-2.5">
-              <div className="bg-gradient-to-br from-[#f0b90b] to-[#d4a00a] p-2 rounded-lg shadow-lg">
-                <Wallet className="h-5 w-5 text-white" />
-              </div>
-              {showTitle && title && (
-                <div className="hidden sm:block">
-                  <h1 className="text-lg font-bold text-white leading-tight">
-                    {title}
-                  </h1>
-                  {subtitle && (
-                    <p className="text-xs text-[#848e9c] leading-tight mt-0.5">
-                      {subtitle}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
             {/* 主导航 - 桌面端显示 */}
             {navItems && navItems.length > 0 && (
-              <nav className="hidden md:flex items-center gap-1 ml-4">
+              <nav className="flex items-center gap-1">
                 {navItems.map((item) => {
                   const isActive = item.value === activeNav;
                   return (
@@ -151,16 +132,16 @@ export default function PageHeader({
                       key={item.value}
                       onClick={() => onNavChange?.(item.value)}
                       className={cn(
-                        'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                        'flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-200 border-b-2',
                         isActive
-                          ? 'bg-[#f0b90b] text-[#0b0e11]'
-                          : 'text-[#848e9c] hover:text-white hover:bg-[#1e2329]'
+                          ? 'text-[#f0b90b] border-[#f0b90b]'
+                          : 'text-[#848e9c] border-transparent hover:text-white hover:border-[#474d57]'
                       )}
                     >
                       {item.icon && (
                         <span className={cn(
                           'flex-shrink-0',
-                          isActive ? 'text-[#0b0e11]' : 'text-[#848e9c]'
+                          isActive ? 'text-[#f0b90b]' : 'text-[#848e9c]'
                         )}>
                           {React.cloneElement(item.icon as React.ReactElement<any>, {
                             className: 'h-4 w-4',
@@ -247,8 +228,8 @@ export default function PageHeader({
 
         {/* 移动端导航 Tab */}
         {navItems && navItems.length > 0 && (
-          <div className="md:hidden mt-3">
-            <div className="flex items-center gap-1 bg-[#1e2329] p-1 rounded-lg overflow-x-auto">
+          <div className="md:hidden mt-0">
+            <div className="flex items-center gap-1 overflow-x-auto">
               {navItems.map((item) => {
                 const isActive = item.value === activeNav;
                 return (
@@ -256,16 +237,16 @@ export default function PageHeader({
                     key={item.value}
                     onClick={() => onNavChange?.(item.value)}
                     className={cn(
-                      'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex-shrink-0 whitespace-nowrap',
+                      'flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-200 flex-shrink-0 whitespace-nowrap border-b-2',
                       isActive
-                        ? 'bg-[#f0b90b] text-[#0b0e11]'
-                        : 'text-[#848e9c] hover:text-white'
+                        ? 'text-[#f0b90b] border-[#f0b90b]'
+                        : 'text-[#848e9c] border-transparent hover:text-white hover:border-[#474d57]'
                     )}
                   >
                     {item.icon && (
                       <span className={cn(
                         'flex-shrink-0',
-                        isActive ? 'text-[#0b0e11]' : 'text-[#848e9c]'
+                        isActive ? 'text-[#f0b90b]' : 'text-[#848e9c]'
                       )}>
                         {React.cloneElement(item.icon as React.ReactElement<any>, {
                           className: 'h-4 w-4',
