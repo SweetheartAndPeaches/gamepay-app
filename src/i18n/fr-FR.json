@@ -74,6 +74,7 @@
   "tasks": {
     "payout": {
       "title": "Tâches de paiement",
+      "subtitle": "Complétez les tâches de paiement et gagnez des récompenses",
       "description": "Complétez les tâches minimales quotidiennes pour accéder aux tâches d'encaissement",
       "totalTasks": "Total des tâches",
       "taskRange": "Plage de montant",

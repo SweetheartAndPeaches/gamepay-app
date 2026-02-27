@@ -74,6 +74,7 @@
   "tasks": {
     "payout": {
       "title": "支払いタスク",
+      "subtitle": "支払いタスクを完了して報酬を獲得",
       "description": "毎日の最低タスクを完了して入金タスクにアクセスしてください",
       "totalTasks": "総タスク数",
       "taskRange": "金額範囲",

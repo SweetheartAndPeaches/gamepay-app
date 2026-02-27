@@ -74,6 +74,7 @@
   "tasks": {
     "payout": {
       "title": "Auszahlungsaufgaben",
+      "subtitle": "Absolvieren Sie Auszahlungsaufgaben und verdienen Sie Belohnungen",
       "description": "Absolvieren Sie die täglichen Mindestaufgaben, um auf Einzahlungsaufgaben zuzugreifen",
       "totalTasks": "Gesamtaufgaben",
       "taskRange": "Bereichsbetrag",

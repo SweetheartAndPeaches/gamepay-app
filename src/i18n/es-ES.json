@@ -74,6 +74,7 @@
   "tasks": {
     "payout": {
       "title": "Tareas de pago",
+      "subtitle": "Complete tareas de pago y gane recompensas",
       "description": "Complete las tareas mínimas diarias para acceder a tareas de cobro",
       "totalTasks": "Total de tareas",
       "taskRange": "Rango de monto",

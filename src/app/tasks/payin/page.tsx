@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/MainLayout';
+import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from '@/i18n/context';
-import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield, Upload, Loader2, RefreshCw } from 'lucide-react';
+import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield, Upload, Loader2, RefreshCw, HelpCircle, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PayinOrder {
@@ -343,7 +344,17 @@ export default function PayinTasksPage() {
   return (
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">{t('tasks.payin.title')}</h1>
+        <PageHeader
+          title={t('tasks.payin.title')}
+          gradient="blue"
+          showRefresh={true}
+          onRefresh={fetchUserInfo}
+          showHelp={true}
+          onHelp={() => {/* TODO: 显示帮助文档 */}}
+          showNotification={true}
+          notificationCount={2}
+          onNotification={() => {/* TODO: 显示通知 */}}
+        />
 
         {/* 系统未开启提示 */}
         {!enabled && (
@@ -403,7 +414,7 @@ export default function PayinTasksPage() {
         {/* 页面状态：空闲 - 显示创建订单表单 */}
         {enabled && hasAccounts && pageState === 'idle' && (
           <Card className="p-4">
-            <h2 className="text-lg font-semibold mb-4">创建代收订单</h2>
+            <h2 className="text-lg font-semibold mb-4">代收任务配置</h2>
 
             {/* 选择代收账户 - 支持多选 */}
             <div className="mb-4">

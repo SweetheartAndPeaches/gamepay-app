@@ -74,6 +74,7 @@
   "tasks": {
     "payout": {
       "title": "Payout Tasks",
+      "subtitle": "Complete payout tasks and earn rewards",
       "description": "Complete daily minimum tasks to access payin tasks",
       "totalTasks": "Total Tasks",
       "taskRange": "Amount Range",

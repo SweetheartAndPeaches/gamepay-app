@@ -74,6 +74,7 @@
   "tasks": {
     "payout": {
       "title": "지급 작업",
+      "subtitle": "지급 작업을 완료하고 보상을 받으세요",
       "description": "일일 최소 작업을 완료하면 수금 작업에 액세스할 수 있습니다",
       "totalTasks": "총 작업 수",
       "taskRange": "금액 범위",

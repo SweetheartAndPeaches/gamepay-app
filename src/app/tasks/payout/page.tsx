@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/MainLayout';
+import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +18,7 @@ import {
 import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import { authFetch } from '@/lib/auth';
-import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter, HelpCircle, Bell, RefreshCw } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -471,7 +472,24 @@ export default function PayoutTasksPage() {
   return (
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
-        <h1 className="text-xl font-bold text-gray-900">{t('tasks.payout.title')}</h1>
+        <PageHeader
+          title={t('tasks.payout.title')}
+          subtitle={t('tasks.payout.subtitle')}
+          gradient="green"
+          showRefresh={true}
+          onRefresh={() => {
+            if (activeTab === 'hall') {
+              fetchAvailableTasks();
+            } else {
+              fetchClaimedTasks();
+            }
+          }}
+          showHelp={true}
+          onHelp={() => {/* TODO: 显示帮助文档 */}}
+          showNotification={true}
+          notificationCount={5}
+          onNotification={() => {/* TODO: 显示通知 */}}
+        />
 
         {/* 提示卡片 */}
         {!canClaim && activeTask && (
