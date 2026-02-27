@@ -3,6 +3,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* 覆盖默认颜色，使用币安风格设计系统 */
+@layer base {
+  .bg-white { background-color: #14171a !important; }
+  .bg-gray-50 { background-color: #0b0e11 !important; }
+  .bg-gray-100 { background-color: #1e2329 !important; }
+  .bg-gray-200 { background-color: #2b3139 !important; }
+  .text-white { color: #ffffff !important; }
+  .text-gray-900 { color: #f0f3f5 !important; }
+  .text-gray-700 { color: #f0f3f5 !important; }
+  .text-gray-600 { color: #848e9c !important; }
+  .text-gray-500 { color: #5e6673 !important; }
+  .text-blue-600 { color: #3b82f6 !important; }
+  .border-gray-200 { border-color: #2b3139 !important; }
+  .border-gray-300 { border-color: #2b3139 !important; }
+}
+
 @theme inline {
   /* 字体家族 */
   --font-sans:
@@ -41,6 +57,95 @@
   --color-success: #22c55e;
   --color-warning: #f97316;
   --color-info: #0ea5e9;
+
+  /* 完整的颜色系统映射 - 币安风格深色主题 */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* gray - 深色主题灰度系统 */
+  --color-gray-50: #1e2329;
+  --color-gray-100: #1e2329;
+  --color-gray-200: #2b3139;
+  --color-gray-300: #2b3139;
+  --color-gray-400: #474d57;
+  --color-gray-500: #5e6673;
+  --color-gray-600: #848e9c;
+  --color-gray-700: #848e9c;
+  --color-gray-800: #f0f3f5;
+  --color-gray-900: #f0f3f5;
+  --color-gray-950: #ffffff;
+
+  /* blue - 品牌辅助色 */
+  --color-blue-50: #172554;
+  --color-blue-100: #1e3a8a;
+  --color-blue-200: #1e40af;
+  --color-blue-300: #2563eb;
+  --color-blue-400: #2563eb;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #3b82f6;
+  --color-blue-700: #3b82f6;
+  --color-blue-800: #60a5fa;
+  --color-blue-900: #93c5fd;
+
+  /* yellow - 品牌主色 */
+  --color-yellow-50: #422006;
+  --color-yellow-100: #713f12;
+  --color-yellow-200: #a16207;
+  --color-yellow-300: #a16207;
+  --color-yellow-400: #ca8a04;
+  --color-yellow-500: #eab308;
+  --color-yellow-600: #eab308;
+  --color-yellow-700: #facc15;
+  --color-yellow-800: #fde047;
+  --color-yellow-900: #fef9c3;
+
+  /* green - 成功色 */
+  --color-green-50: #14532d;
+  --color-green-100: #166534;
+  --color-green-200: #16a34a;
+  --color-green-300: #22c55e;
+  --color-green-400: #22c55e;
+  --color-green-500: #22c55e;
+  --color-green-600: #4ade80;
+  --color-green-700: #4ade80;
+  --color-green-800: #86efac;
+  --color-green-900: #bbf7d0;
+
+  /* orange - 警告色 */
+  --color-orange-50: #7c2d12;
+  --color-orange-100: #9a3412;
+  --color-orange-200: #c2410c;
+  --color-orange-300: #ea580c;
+  --color-orange-400: #f97316;
+  --color-orange-500: #f97316;
+  --color-orange-600: #fb923c;
+  --color-orange-700: #fb923c;
+  --color-orange-800: #fdba74;
+  --color-orange-900: #fed7aa;
+
+  /* red - 错误色 */
+  --color-red-50: #7f1d1d;
+  --color-red-100: #991b1b;
+  --color-red-200: #b91c1c;
+  --color-red-300: #dc2626;
+  --color-red-400: #ef4444;
+  --color-red-500: #ef4444;
+  --color-red-600: #ef4444;
+  --color-red-700: #f87171;
+  --color-red-800: #fca5a5;
+  --color-red-900: #fecaca;
+
+  /* slate - 替代 gray 的更深色系 */
+  --color-slate-50: #0b0e11;
+  --color-slate-100: #14171a;
+  --color-slate-200: #1e2329;
+  --color-slate-300: #2b3139;
+  --color-slate-400: #474d57;
+  --color-slate-500: #5e6673;
+  --color-slate-600: #848e9c;
+  --color-slate-700: #848e9c;
+  --color-slate-800: #f0f3f5;
+  --color-slate-900: #f0f3f5;
 
   /* 圆角 */
   --radius: 0.5rem;
