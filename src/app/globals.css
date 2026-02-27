@@ -3,22 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* 覆盖默认颜色，使用币安风格设计系统 */
-@layer base {
-  .bg-white { background-color: #14171a !important; }
-  .bg-gray-50 { background-color: #0b0e11 !important; }
-  .bg-gray-100 { background-color: #1e2329 !important; }
-  .bg-gray-200 { background-color: #2b3139 !important; }
-  .text-white { color: #ffffff !important; }
-  .text-gray-900 { color: #f0f3f5 !important; }
-  .text-gray-700 { color: #f0f3f5 !important; }
-  .text-gray-600 { color: #848e9c !important; }
-  .text-gray-500 { color: #5e6673 !important; }
-  .text-blue-600 { color: #3b82f6 !important; }
-  .border-gray-200 { border-color: #2b3139 !important; }
-  .border-gray-300 { border-color: #2b3139 !important; }
-}
-
 @theme inline {
   /* 字体家族 */
   --font-sans:
@@ -32,25 +16,25 @@
     JetBrains Mono, SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas,
     "Courier New", monospace;
 
-  /* 颜色系统 - 币安风格 */
-  --background: #0b0e11;
-  --foreground: #f0f3f5;
-  --card: #14171a;
-  --card-foreground: #f0f3f5;
-  --popover: #14171a;
-  --popover-foreground: #f0f3f5;
+  /* 颜色系统 - 默认浅色主题 */
+  --background: #ffffff;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
   --primary: #eab308;
-  --primary-foreground: #0b0e11;
-  --secondary: #2b3139;
-  --secondary-foreground: #f0f3f5;
-  --muted: #2b3139;
-  --muted-foreground: #848e9c;
-  --accent: #2b3139;
-  --accent-foreground: #f0f3f5;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --accent: #f3f4f6;
+  --accent-foreground: #111827;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #2b3139;
-  --input: #2b3139;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
   --ring: #eab308;
 
   /* 扩展颜色 */
@@ -62,18 +46,18 @@
   --color-white: #ffffff;
   --color-black: #000000;
 
-  /* gray - 深色主题灰度系统 */
-  --color-gray-50: #1e2329;
-  --color-gray-100: #1e2329;
-  --color-gray-200: #2b3139;
-  --color-gray-300: #2b3139;
-  --color-gray-400: #474d57;
-  --color-gray-500: #5e6673;
-  --color-gray-600: #848e9c;
-  --color-gray-700: #848e9c;
-  --color-gray-800: #f0f3f5;
-  --color-gray-900: #f0f3f5;
-  --color-gray-950: #ffffff;
+  /* gray - 标准灰色系统（浅色主题） */
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+  --color-gray-950: #030712;
 
   /* blue - 品牌辅助色 */
   --color-blue-50: #172554;
@@ -155,6 +139,41 @@
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
   --radius-full: 9999px;
+}
+
+/* 深色主题 */
+.dark {
+  --background: #0b0e11;
+  --foreground: #f0f3f5;
+  --card: #14171a;
+  --card-foreground: #f0f3f5;
+  --popover: #14171a;
+  --popover-foreground: #f0f3f5;
+  --primary: #eab308;
+  --primary-foreground: #0b0e11;
+  --secondary: #2b3139;
+  --secondary-foreground: #f0f3f5;
+  --muted: #2b3139;
+  --muted-foreground: #848e9c;
+  --accent: #2b3139;
+  --accent-foreground: #f0f3f5;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #2b3139;
+  --input: #2b3139;
+  --ring: #eab308;
+
+  /* 深色主题的 gray 颜色 */
+  --color-gray-50: #1e2329;
+  --color-gray-100: #1e2329;
+  --color-gray-200: #2b3139;
+  --color-gray-300: #2b3139;
+  --color-gray-400: #474d57;
+  --color-gray-500: #5e6673;
+  --color-gray-600: #848e9c;
+  --color-gray-700: #848e9c;
+  --color-gray-800: #f0f3f5;
+  --color-gray-900: #f0f3f5;
 }
 
 /* 根样式 - 深色主题（默认） */
