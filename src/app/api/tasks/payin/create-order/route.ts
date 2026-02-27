@@ -86,15 +86,28 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查用户是否已有未完成的订单
-    const { data: activeOrder, error: activeOrderError } = await client
-      .from('payin_orders')
-      .select('*')
-      .eq('user_id', payload.userId)
-      .in('status', ['created', 'paying'])
-      .maybeSingle();
+    let activeOrder = null;
+    try {
+      const result = await client
+        .from('payin_orders')
+        .select('*')
+        .eq('user_id', payload.userId)
+        .in('status', ['created', 'paying'])
+        .maybeSingle();
 
-    if (activeOrderError) {
-      console.error('Get active order error:', activeOrderError);
+      if (result.error) {
+        // 如果是表不存在错误，则忽略（说明用户肯定没有未完成订单）
+        if (result.error.code === 'PGRST116' || result.error.message?.includes('Could not find')) {
+          console.warn('payin_orders table not found in schema cache, assuming no active orders');
+          activeOrder = null;
+        } else {
+          throw result.error;
+        }
+      } else {
+        activeOrder = result.data;
+      }
+    } catch (error) {
+      console.error('Get active order error:', error);
       return NextResponse.json(
         { success: false, message: '获取订单状态失败' },
         { status: 500 }
@@ -200,23 +213,45 @@ export async function POST(request: NextRequest) {
     });
 
     // 创建本地订单记录
-    const { data: order, error: createOrderError } = await client
-      .from('payin_orders')
-      .insert({
-        user_id: payload.userId,
-        account_id: primaryAccount.id,
-        order_no: orderNo,
-        amount: amount,
-        commission: commission,
-        status: 'created',
-        payment_method: paymentMethod,
-        payment_currency: paymentMethod === 'MILURU_QR' ? 'PEN' : 'COP',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        expires_at: expiresAt.toISOString(),
-      })
-      .select()
-      .single();
+    let order;
+    let createOrderError;
+    try {
+      const result = await client
+        .from('payin_orders')
+        .insert({
+          user_id: payload.userId,
+          account_id: primaryAccount.id,
+          order_no: orderNo,
+          amount: amount,
+          commission: commission,
+          status: 'created',
+          payment_method: paymentMethod,
+          payment_currency: paymentMethod === 'MILURU_QR' ? 'PEN' : 'COP',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          expires_at: expiresAt.toISOString(),
+        })
+        .select()
+        .single();
+
+      if (result.error) {
+        throw result.error;
+      }
+      order = result.data;
+      createOrderError = null;
+    } catch (error: any) {
+      console.error('Create order error:', error);
+
+      // 检查是否是schema cache问题
+      if (error.code === 'PGRST116' || error.message?.includes('Could not find')) {
+        return NextResponse.json(
+          { success: false, message: '系统正在更新，请稍后再试' },
+          { status: 503 }
+        );
+      }
+
+      createOrderError = error;
+    }
 
     if (createOrderError) {
       console.error('Create order error:', createOrderError);

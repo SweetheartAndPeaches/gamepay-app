@@ -33,6 +33,7 @@ export function getSupabaseClient(token?: string): SupabaseClient {
   return createClient(url, serviceKey, {
     db: {
       timeout: 60000,
+      schema: 'public', // 明确指定使用 public schema
     },
     auth: {
       autoRefreshToken: false,
