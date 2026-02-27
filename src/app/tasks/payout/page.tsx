@@ -17,7 +17,7 @@ import {
 import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import { authFetch } from '@/lib/auth';
-import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter, Menu, MessageSquare, User } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter, MessageSquare, User } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -472,12 +472,8 @@ export default function PayoutTasksPage() {
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
         <PageHeader
-          title={t('tasks.payout.title')}
+          title={t('common.appName')}
           subtitle={t('tasks.payout.subtitle')}
-          gradient="modern"
-          icon={<Wallet className="h-5 w-5" />}
-          showMenu={true}
-          onMenu={() => {/* TODO: 打开侧边栏 */}}
           showRefresh={true}
           onRefresh={() => {
             if (activeTab === 'hall') {
@@ -494,7 +490,9 @@ export default function PayoutTasksPage() {
           showAvatar={true}
           userName={user?.phone || 'User'}
           onAvatarClick={() => router.push('/profile')}
-          tabs={[
+          showMobileMenu={true}
+          onMobileMenu={() => {/* TODO: 打开移动端侧边栏 */}}
+          navItems={[
             {
               label: t('tasks.payout.hall'),
               value: 'hall',
@@ -506,8 +504,8 @@ export default function PayoutTasksPage() {
               icon: <Clock className="h-4 w-4" />,
             },
           ]}
-          activeTab={activeTab}
-          onTabChange={(value) => {
+          activeNav={activeTab}
+          onNavChange={(value) => {
             setActiveTab(value as 'hall' | 'claimed');
           }}
         />

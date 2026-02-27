@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from '@/i18n/context';
+import { useAuth } from '@/contexts/AuthContext';
 import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield, Upload, Loader2, RefreshCw, HelpCircle, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -46,6 +47,7 @@ type PageState = 'idle' | 'creating' | 'paying' | 'uploading' | 'confirming';
 export default function PayinTasksPage() {
   const { t, formatCurrency } = useI18n();
   const router = useRouter();
+  const { user } = useAuth();
 
   const [pageState, setPageState] = useState<PageState>('idle');
   const [userBalance, setUserBalance] = useState(0);
@@ -345,13 +347,20 @@ export default function PayinTasksPage() {
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
         <PageHeader
-          title={t('tasks.payin.title')}
-          gradient="blue"
+          title={t('common.appName')}
+          subtitle={t('tasks.payin.title')}
           showRefresh={true}
           onRefresh={fetchUserInfo}
           showNotification={true}
           notificationCount={2}
           onNotification={() => {/* TODO: 打开消息通知 */}}
+          showSupport={true}
+          onSupport={() => {/* TODO: 打开人工客服 */}}
+          showAvatar={true}
+          userName={user?.phone || 'User'}
+          onAvatarClick={() => router.push('/profile')}
+          showMobileMenu={true}
+          onMobileMenu={() => {/* TODO: 打开移动端侧边栏 */}}
         />
 
         {/* 系统未开启提示 */}
