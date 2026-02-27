@@ -4,7 +4,49 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  /* 字体家族 */
+  /* 颜色变量映射（来自 :root 和 .dark） */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* 圆角 */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* 字体家族 - 保留当前字体系统 */
   --font-sans:
     -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", "Helvetica Neue",
     Arial, "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
@@ -15,236 +57,103 @@
   --font-mono:
     JetBrains Mono, SF Mono, Monaco, Cascadia Code, Roboto Mono, Consolas,
     "Courier New", monospace;
+}
 
-  /* 颜色系统 - 默认浅色主题 */
-  --background: #ffffff;
-  --foreground: #111827;
-  --card: #ffffff;
-  --card-foreground: #111827;
-  --popover: #ffffff;
-  --popover-foreground: #111827;
-  --primary: #eab308;
-  --primary-foreground: #ffffff;
-  --secondary: #f3f4f6;
-  --secondary-foreground: #111827;
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-  --accent: #f3f4f6;
-  --accent-foreground: #111827;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e5e7eb;
-  --input: #e5e7eb;
-  --ring: #eab308;
+/* 浅色主题（默认） */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 
-  /* 扩展颜色 */
-  --color-success: #22c55e;
-  --color-warning: #f97316;
-  --color-info: #0ea5e9;
-
-  /* 完整的颜色系统映射 - 币安风格深色主题 */
-  --color-white: #ffffff;
-  --color-black: #000000;
-
-  /* gray - 标准灰色系统（浅色主题） */
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-200: #e5e7eb;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
-  --color-gray-950: #030712;
-
-  /* blue - 品牌辅助色 */
-  --color-blue-50: #172554;
-  --color-blue-100: #1e3a8a;
-  --color-blue-200: #1e40af;
-  --color-blue-300: #2563eb;
-  --color-blue-400: #2563eb;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #3b82f6;
-  --color-blue-700: #3b82f6;
-  --color-blue-800: #60a5fa;
-  --color-blue-900: #93c5fd;
-
-  /* yellow - 品牌主色 */
-  --color-yellow-50: #422006;
-  --color-yellow-100: #713f12;
-  --color-yellow-200: #a16207;
-  --color-yellow-300: #a16207;
-  --color-yellow-400: #ca8a04;
-  --color-yellow-500: #eab308;
-  --color-yellow-600: #eab308;
-  --color-yellow-700: #facc15;
-  --color-yellow-800: #fde047;
-  --color-yellow-900: #fef9c3;
-
-  /* green - 成功色 */
-  --color-green-50: #14532d;
-  --color-green-100: #166534;
-  --color-green-200: #16a34a;
-  --color-green-300: #22c55e;
-  --color-green-400: #22c55e;
-  --color-green-500: #22c55e;
-  --color-green-600: #4ade80;
-  --color-green-700: #4ade80;
-  --color-green-800: #86efac;
-  --color-green-900: #bbf7d0;
-
-  /* orange - 警告色 */
-  --color-orange-50: #7c2d12;
-  --color-orange-100: #9a3412;
-  --color-orange-200: #c2410c;
-  --color-orange-300: #ea580c;
-  --color-orange-400: #f97316;
-  --color-orange-500: #f97316;
-  --color-orange-600: #fb923c;
-  --color-orange-700: #fb923c;
-  --color-orange-800: #fdba74;
-  --color-orange-900: #fed7aa;
-
-  /* red - 错误色 */
-  --color-red-50: #7f1d1d;
-  --color-red-100: #991b1b;
-  --color-red-200: #b91c1c;
-  --color-red-300: #dc2626;
-  --color-red-400: #ef4444;
-  --color-red-500: #ef4444;
-  --color-red-600: #ef4444;
-  --color-red-700: #f87171;
-  --color-red-800: #fca5a5;
-  --color-red-900: #fecaca;
-
-  /* slate - 替代 gray 的更深色系 */
-  --color-slate-50: #0b0e11;
-  --color-slate-100: #14171a;
-  --color-slate-200: #1e2329;
-  --color-slate-300: #2b3139;
-  --color-slate-400: #474d57;
-  --color-slate-500: #5e6673;
-  --color-slate-600: #848e9c;
-  --color-slate-700: #848e9c;
-  --color-slate-800: #f0f3f5;
-  --color-slate-900: #f0f3f5;
-
-  /* 圆角 */
-  --radius: 0.5rem;
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-full: 9999px;
+  /* PageHeader 组件自定义变量 - 浅色主题 */
+  --bg-primary: oklch(1 0 0);
+  --bg-secondary: oklch(0.97 0 0);
+  --bg-tertiary: oklch(0.94 0 0);
+  --border-default: oklch(0.922 0 0);
+  --border-subtle: oklch(0.88 0 0);
+  --text-primary: oklch(0.145 0 0);
+  --text-secondary: oklch(0.556 0 0);
+  --text-tertiary: oklch(0.708 0 0);
+  --brand-primary: oklch(0.6 0.15 85);
+  --brand-primary-hover: oklch(0.55 0.15 85);
+  --brand-primary-active: oklch(0.5 0.15 85);
 }
 
 /* 深色主题 */
 .dark {
-  --background: #0b0e11;
-  --foreground: #f0f3f5;
-  --card: #14171a;
-  --card-foreground: #f0f3f5;
-  --popover: #14171a;
-  --popover-foreground: #f0f3f5;
-  --primary: #eab308;
-  --primary-foreground: #0b0e11;
-  --secondary: #2b3139;
-  --secondary-foreground: #f0f3f5;
-  --muted: #2b3139;
-  --muted-foreground: #848e9c;
-  --accent: #2b3139;
-  --accent-foreground: #f0f3f5;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #2b3139;
-  --input: #2b3139;
-  --ring: #eab308;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 
-  /* 深色主题的 gray 颜色 */
-  --color-gray-50: #1e2329;
-  --color-gray-100: #1e2329;
-  --color-gray-200: #2b3139;
-  --color-gray-300: #2b3139;
-  --color-gray-400: #474d57;
-  --color-gray-500: #5e6673;
-  --color-gray-600: #848e9c;
-  --color-gray-700: #848e9c;
-  --color-gray-800: #f0f3f5;
-  --color-gray-900: #f0f3f5;
-}
-
-/* 根样式 - 深色主题（默认） */
-:root {
-  /* 背景 */
-  --bg-primary: #0b0e11;
-  --bg-secondary: #14171a;
-  --bg-tertiary: #1e2329;
-  --bg-elevated: #2b3139;
-
-  /* 边框 */
-  --border-default: #2b3139;
-  --border-subtle: #474d57;
-  --border-strong: #0e1318;
-
-  /* 文字 */
-  --text-primary: #f0f3f5;
-  --text-secondary: #848e9c;
-  --text-tertiary: #5e6673;
-  --text-disabled: #474d57;
-
-  /* 品牌色 */
-  --brand-primary: #eab308;
-  --brand-primary-hover: #ca8a04;
-  --brand-primary-active: #a16207;
-  --brand-secondary: #3b82f6;
-  --brand-secondary-hover: #2563eb;
-
-  /* 语义色 */
-  --color-success: #22c55e;
-  --color-success-light: #4ade80;
-  --color-warning: #f97316;
-  --color-warning-light: #fb923c;
-  --color-error: #ef4444;
-  --color-error-light: #f87171;
-  --color-info: #0ea5e9;
-  --color-info-light: #38bdf8;
-
-  /* 阴影 */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 20px rgba(234, 179, 8, 0.3);
-
-  /* 过渡动画 */
-  --transition-fast: 150ms ease-in-out;
-  --transition-normal: 200ms ease-in-out;
-  --transition-slow: 300ms ease-in-out;
-}
-
-/* 浅色主题（可选） */
-:root.light {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-tertiary: #f3f4f6;
-  --bg-elevated: #ffffff;
-
-  --border-default: #e5e7eb;
-  --border-subtle: #d1d5db;
-  --border-strong: #9ca3af;
-
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
-  --text-disabled: #d1d5db;
-
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  /* PageHeader 组件自定义变量 - 深色主题 */
+  --bg-primary: oklch(0.145 0 0);
+  --bg-secondary: oklch(0.205 0 0);
+  --bg-tertiary: oklch(0.269 0 0);
+  --border-default: oklch(1 0 0 / 10%);
+  --border-subtle: oklch(0.556 0.3 0);
+  --text-primary: oklch(0.985 0 0);
+  --text-secondary: oklch(0.708 0 0);
+  --text-tertiary: oklch(0.556 0 0);
+  --brand-primary: oklch(0.76 0.15 85);
+  --brand-primary-hover: oklch(0.8 0.15 85);
+  --brand-primary-active: oklch(0.72 0.15 85);
 }
 
 @layer base {
@@ -255,191 +164,8 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", "Helvetica Neue",
-                 Arial, "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-                 sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
-  /* 排版层级 */
-  h1, .text-h1 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    line-height: 1.25;
-    letter-spacing: -0.025em;
-  }
-
-  h2, .text-h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.375;
-    letter-spacing: -0.025em;
-  }
-
-  h3, .text-h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.375;
-  }
-
-  h4, .text-h4 {
-    font-size: 1.125rem;
-    font-weight: 500;
-    line-height: 1.375;
-  }
-
-  p, .text-body {
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-
-  .text-body-small {
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
-  .text-caption {
-    font-size: 0.75rem;
-    line-height: 1.625;
-    color: var(--text-secondary);
-  }
-
-  .text-label {
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
-  }
-
-  /* 按钮文字 */
-  .text-button {
-    font-size: 0.875rem;
-    font-weight: 600;
-    line-height: 1.25;
-  }
-
-  /* 价格文字 */
-  .text-price {
-    font-size: 1.25rem;
-    font-weight: 700;
-    line-height: 1.25;
-    font-family: JetBrains Mono, SF Mono, Monaco, monospace;
-  }
-
-  /* 链接文字 */
-  .text-link {
-    font-size: 0.875rem;
-    font-weight: 500;
-    line-height: 1.5;
-  }
-}
-
-/* 实用类扩展 */
-@layer utilities {
-  /* 文本颜色 - 品牌色 */
-  .text-brand-primary {
-    color: var(--brand-primary);
-  }
-  .text-brand-primary:hover {
-    color: var(--brand-primary-hover);
-  }
-
-  /* 背景颜色 */
-  .bg-brand-primary {
-    background-color: var(--brand-primary);
-  }
-  .bg-brand-secondary {
-    background-color: var(--brand-secondary);
-  }
-
-  /* 边框颜色 */
-  .border-brand-primary {
-    border-color: var(--brand-primary);
-  }
-
-  /* 阴影 */
-  .shadow-glow {
-    box-shadow: var(--shadow-glow);
-  }
-
-  /* 过渡动画 */
-  .transition-fast {
-    transition-duration: var(--transition-fast);
-  }
-  .transition-normal {
-    transition-duration: var(--transition-normal);
-  }
-  .transition-slow {
-    transition-duration: var(--transition-slow);
-  }
-
-  /* 渐变背景 */
-  .gradient-brand {
-    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-hover) 100%);
-  }
-  .gradient-brand-secondary {
-    background: linear-gradient(135deg, var(--brand-secondary) 0%, var(--brand-secondary-hover) 100%);
-  }
-
-  /* 玻璃态效果 */
-  .glass {
-    background: rgba(20, 23, 26, 0.8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .glass-strong {
-    background: rgba(11, 14, 17, 0.9);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-}
-
-/* 全局样式 */
-* {
-  box-sizing: border-box;
-}
-
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-}
-
-body {
-  overflow-x: hidden;
-}
-
-/* 自定义滚动条 */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-subtle);
-}
-
-/* 选中文本样式 */
-::selection {
-  background-color: var(--brand-primary);
-  color: var(--bg-primary);
-}
-
-/* 焦点样式 */
-:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
 }
