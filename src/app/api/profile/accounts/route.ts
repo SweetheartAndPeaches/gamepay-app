@@ -56,17 +56,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 根据类型过滤账户
-    const payinTypes = ['wechat_qrcode', 'alipay_qrcode', 'alipay_account', 'bank_card'];
-    const payoutTypes = ['wechat_qrcode', 'alipay_qrcode', 'alipay_account'];
-
+    // 根据 usage_type 过滤账户
     const filteredAccounts = accounts?.filter((account: any) => {
-      const accountType = account.account_type;
-      if (type === 'payin') {
-        return payinTypes.includes(accountType);
-      } else {
-        return payoutTypes.includes(accountType);
+      const accountUsageType = account.account_info?.usage_type;
+      
+      // 如果没有设置 usage_type，根据账户类型推断
+      if (!accountUsageType) {
+        const accountType = account.account_type;
+        // 银行卡默认为代收账户
+        if (accountType === 'bank_card') {
+          return type === 'payin';
+        }
+        // 其他账户类型根据账户类型判断
+        const payinTypes = ['wechat_qrcode', 'alipay_qrcode', 'alipay_account', 'bank_card'];
+        const payoutTypes = ['wechat_qrcode', 'alipay_qrcode', 'alipay_account'];
+        if (type === 'payin') {
+          return payinTypes.includes(accountType);
+        } else {
+          return payoutTypes.includes(accountType);
+        }
       }
+      
+      // 如果设置了 usage_type，则直接比较
+      return accountUsageType === type;
     }) || [];
 
     // 转换字段名：蛇形命名 -> 驼峰命名
@@ -255,6 +267,7 @@ export async function POST(request: NextRequest) {
     // 构建账户信息
     const accountInfo: any = {
       name: accountName,
+      usage_type: usageType, // 存储使用类型：payin 或 payout
     };
 
     if (accountType.includes('qrcode')) {
