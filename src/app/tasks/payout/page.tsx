@@ -472,8 +472,7 @@ export default function PayoutTasksPage() {
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
         <PageHeader
-          title={t('common.appName')}
-          subtitle={t('tasks.payout.subtitle')}
+          showTitle={false}
           showRefresh={true}
           onRefresh={() => {
             if (activeTab === 'hall') {

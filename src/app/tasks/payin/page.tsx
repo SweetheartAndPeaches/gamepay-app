@@ -347,8 +347,7 @@ export default function PayinTasksPage() {
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
         <PageHeader
-          title={t('common.appName')}
-          subtitle={t('tasks.payin.title')}
+          showTitle={false}
           showRefresh={true}
           onRefresh={fetchUserInfo}
           showNotification={true}

@@ -16,9 +16,11 @@ import {
 
 export interface PageHeaderProps {
   /** 标题 */
-  title: string;
+  title?: string;
   /** 副标题（可选） */
   subtitle?: string;
+  /** 是否显示标题 */
+  showTitle?: boolean;
   /** 是否显示刷新按钮 */
   showRefresh?: boolean;
   /** 刷新按钮点击事件 */
@@ -58,6 +60,7 @@ export interface PageHeaderProps {
 export default function PageHeader({
   title,
   subtitle,
+  showTitle = true,
   showRefresh = false,
   onRefresh,
   showNotification = false,
@@ -124,16 +127,18 @@ export default function PageHeader({
               <div className="bg-gradient-to-br from-[#f0b90b] to-[#d4a00a] p-2 rounded-lg shadow-lg">
                 <Wallet className="h-5 w-5 text-white" />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-white leading-tight">
-                  {title}
-                </h1>
-                {subtitle && (
-                  <p className="text-xs text-[#848e9c] leading-tight mt-0.5">
-                    {subtitle}
-                  </p>
-                )}
-              </div>
+              {showTitle && title && (
+                <div className="hidden sm:block">
+                  <h1 className="text-lg font-bold text-white leading-tight">
+                    {title}
+                  </h1>
+                  {subtitle && (
+                    <p className="text-xs text-[#848e9c] leading-tight mt-0.5">
+                      {subtitle}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* 主导航 - 桌面端显示 */}
