@@ -22,7 +22,14 @@
     "success": "성공",
     "error": "오류",
     "warning": "경고",
-    "info": "정보"
+    "info": "정보",
+    "menu": "메뉴",
+    "notification": "알림",
+    "support": "고객지원",
+    "profile": "내 정보",
+    "taskHall": "작업 홀",
+    "claimed": "수령됨",
+    "completed": "완료"
   },
   "share": {
     "title": "공유",

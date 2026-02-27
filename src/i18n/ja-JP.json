@@ -22,7 +22,14 @@
     "success": "成功",
     "error": "エラー",
     "warning": "警告",
-    "info": "情報"
+    "info": "情報",
+    "menu": "メニュー",
+    "notification": "通知",
+    "support": "サポート",
+    "profile": "プロフィール",
+    "taskHall": "タスクホール",
+    "claimed": "受け取り済み",
+    "completed": "完了"
   },
   "share": {
     "title": "シェア",

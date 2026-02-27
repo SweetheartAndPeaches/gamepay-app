@@ -25,7 +25,14 @@
     "info": "提示",
     "minAgo": "分钟前",
     "hoursAgo": "小时前",
-    "daysAgo": "天前"
+    "daysAgo": "天前",
+    "menu": "菜单",
+    "notification": "通知",
+    "support": "客服",
+    "profile": "我的",
+    "taskHall": "任务大厅",
+    "claimed": "已领取",
+    "completed": "已完成"
   },
   "share": {
     "title": "分享",

@@ -349,11 +349,9 @@ export default function PayinTasksPage() {
           gradient="blue"
           showRefresh={true}
           onRefresh={fetchUserInfo}
-          showHelp={true}
-          onHelp={() => {/* TODO: 显示帮助文档 */}}
           showNotification={true}
           notificationCount={2}
-          onNotification={() => {/* TODO: 显示通知 */}}
+          onNotification={() => {/* TODO: 打开消息通知 */}}
         />
 
         {/* 系统未开启提示 */}

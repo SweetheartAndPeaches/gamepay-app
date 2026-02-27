@@ -22,7 +22,14 @@
     "success": "Succès",
     "error": "Erreur",
     "warning": "Avertissement",
-    "info": "Information"
+    "info": "Information",
+    "menu": "Menu",
+    "notification": "Notification",
+    "support": "Support",
+    "profile": "Mon profil",
+    "taskHall": "Salle des tâches",
+    "claimed": "Réclamé",
+    "completed": "Terminé"
   },
   "share": {
     "title": "Partager",

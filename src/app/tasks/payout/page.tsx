@@ -7,7 +7,6 @@ import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -18,7 +17,7 @@ import {
 import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import { authFetch } from '@/lib/auth';
-import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter, HelpCircle, Bell, RefreshCw } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter, Menu, MessageSquare, User } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -475,7 +474,10 @@ export default function PayoutTasksPage() {
         <PageHeader
           title={t('tasks.payout.title')}
           subtitle={t('tasks.payout.subtitle')}
-          gradient="green"
+          gradient="modern"
+          icon={<Wallet className="h-5 w-5" />}
+          showMenu={true}
+          onMenu={() => {/* TODO: 打开侧边栏 */}}
           showRefresh={true}
           onRefresh={() => {
             if (activeTab === 'hall') {
@@ -484,11 +486,30 @@ export default function PayoutTasksPage() {
               fetchClaimedTasks();
             }
           }}
-          showHelp={true}
-          onHelp={() => {/* TODO: 显示帮助文档 */}}
           showNotification={true}
           notificationCount={5}
-          onNotification={() => {/* TODO: 显示通知 */}}
+          onNotification={() => {/* TODO: 打开消息通知 */}}
+          showSupport={true}
+          onSupport={() => {/* TODO: 打开人工客服 */}}
+          showAvatar={true}
+          userName={user?.phone || 'User'}
+          onAvatarClick={() => router.push('/profile')}
+          tabs={[
+            {
+              label: t('tasks.payout.hall'),
+              value: 'hall',
+              icon: <MessageSquare className="h-4 w-4" />,
+            },
+            {
+              label: t('tasks.payout.claimedTasks'),
+              value: 'claimed',
+              icon: <Clock className="h-4 w-4" />,
+            },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(value) => {
+            setActiveTab(value as 'hall' | 'claimed');
+          }}
         />
 
         {/* 提示卡片 */}
@@ -537,15 +558,10 @@ export default function PayoutTasksPage() {
           </div>
         </Card>
 
-        {/* 任务 Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="hall">{t('tasks.payout.hall')}</TabsTrigger>
-            <TabsTrigger value="claimed">{t('tasks.payout.claimedTasks')}</TabsTrigger>
-          </TabsList>
-
-          {/* 任务大厅 */}
-          <TabsContent value="hall" className="space-y-3 mt-4">
+        {/* 任务内容 */}
+        {/* 任务大厅 */}
+        {activeTab === 'hall' && (
+          <div className="space-y-3 mt-4">
             {/* 金额范围选择器 */}
             <div className="flex items-center gap-2 mb-4">
               <Filter className="w-4 h-4 text-gray-600" />
@@ -654,10 +670,12 @@ export default function PayoutTasksPage() {
                 )}
               </>
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* 已领取任务 */}
-          <TabsContent value="claimed" className="space-y-3 mt-4">
+        {/* 已领取任务 */}
+        {activeTab === 'claimed' && (
+          <div className="space-y-3 mt-4">
             {loading ? (
               <div className="text-center py-8 text-gray-500">
                 {t('common.loading')}
@@ -716,8 +734,8 @@ export default function PayoutTasksPage() {
                 </Card>
               ))
             )}
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
 
         {/* 任务详情对话框 */}
         {selectedOrder && (
