@@ -52,17 +52,34 @@ export default function AccountsPage() {
     { value: 'alipay_account', label: '支付宝账号', icon: Smartphone },
   ];
 
+  // 获取 token
+  const getToken = () => {
+    if (typeof window === 'undefined') return '';
+    return localStorage.getItem('token') || '';
+  };
+
   const fetchAccounts = async () => {
     try {
+      const token = getToken();
+      if (!token) return;
+
       // 获取代收账户
-      const payinRes = await fetch('/api/profile/accounts?type=payin');
+      const payinRes = await fetch('/api/profile/accounts?type=payin', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const payinData = await payinRes.json();
       if (payinData.success) {
         setPayinAccounts(payinData.data.accounts || []);
       }
 
       // 获取代付账户
-      const payoutRes = await fetch('/api/profile/accounts?type=payout');
+      const payoutRes = await fetch('/api/profile/accounts?type=payout', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const payoutData = await payoutRes.json();
       if (payoutData.success) {
         setPayoutAccounts(payoutData.data.accounts || []);
@@ -134,8 +151,17 @@ export default function AccountsPage() {
 
       const method = editingAccount ? 'PUT' : 'POST';
 
+      const token = getToken();
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
+
       const response = await fetch(url, {
         method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formDataToSend,
       });
 
@@ -159,8 +185,17 @@ export default function AccountsPage() {
     }
 
     try {
+      const token = getToken();
+      if (!token) {
+        alert('请先登录');
+        return;
+      }
+
       const response = await fetch(`/api/profile/accounts/${accountId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       const result = await response.json();
