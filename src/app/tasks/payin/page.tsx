@@ -3,14 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/MainLayout';
-import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from '@/i18n/context';
-import { useAuth } from '@/contexts/AuthContext';
-import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield, Upload, Loader2, RefreshCw, HelpCircle, Bell } from 'lucide-react';
+import { CreditCard, Clock, CheckCircle, AlertCircle, Wallet, Plus, ArrowDownCircle, ArrowUpCircle, Shield, Upload, Loader2, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PayinOrder {
@@ -47,7 +45,6 @@ type PageState = 'idle' | 'creating' | 'paying' | 'uploading' | 'confirming';
 export default function PayinTasksPage() {
   const { t, formatCurrency } = useI18n();
   const router = useRouter();
-  const { user } = useAuth();
 
   const [pageState, setPageState] = useState<PageState>('idle');
   const [userBalance, setUserBalance] = useState(0);
@@ -346,21 +343,7 @@ export default function PayinTasksPage() {
   return (
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
-        <PageHeader
-          showTitle={false}
-          showRefresh={true}
-          onRefresh={fetchUserInfo}
-          showNotification={true}
-          notificationCount={2}
-          onNotification={() => {/* TODO: 打开消息通知 */}}
-          showSupport={true}
-          onSupport={() => {/* TODO: 打开人工客服 */}}
-          showAvatar={true}
-          userName={user?.phone || 'User'}
-          onAvatarClick={() => router.push('/profile')}
-          showMobileMenu={true}
-          onMobileMenu={() => {/* TODO: 打开移动端侧边栏 */}}
-        />
+        <h1 className="text-xl font-bold text-gray-900">{t('tasks.payin.title')}</h1>
 
         {/* 系统未开启提示 */}
         {!enabled && (
@@ -420,7 +403,7 @@ export default function PayinTasksPage() {
         {/* 页面状态：空闲 - 显示创建订单表单 */}
         {enabled && hasAccounts && pageState === 'idle' && (
           <Card className="p-4">
-            <h2 className="text-lg font-semibold mb-4">代收任务配置</h2>
+            <h2 className="text-lg font-semibold mb-4">创建代收订单</h2>
 
             {/* 选择代收账户 - 支持多选 */}
             <div className="mb-4">

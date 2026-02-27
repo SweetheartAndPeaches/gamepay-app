@@ -25,14 +25,7 @@
     "info": "提示",
     "minAgo": "分钟前",
     "hoursAgo": "小时前",
-    "daysAgo": "天前",
-    "menu": "菜单",
-    "notification": "通知",
-    "support": "客服",
-    "profile": "我的",
-    "taskHall": "任务大厅",
-    "claimed": "已领取",
-    "completed": "已完成"
+    "daysAgo": "天前"
   },
   "share": {
     "title": "分享",
@@ -84,7 +77,6 @@
   "tasks": {
     "payout": {
       "title": "代付任务",
-      "subtitle": "完成代付任务，赚取丰厚奖励",
       "description": "完成每日最低任务次数后方可进行代收任务",
       "totalTasks": "总任务数",
       "taskRange": "金额范围",

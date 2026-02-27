@@ -22,14 +22,7 @@
     "success": "Success",
     "error": "Error",
     "warning": "Warning",
-    "info": "Info",
-    "menu": "Menu",
-    "notification": "Notification",
-    "support": "Support",
-    "profile": "Profile",
-    "taskHall": "Task Hall",
-    "claimed": "Claimed",
-    "completed": "Completed"
+    "info": "Info"
   },
   "share": {
     "title": "Share",
@@ -81,7 +74,6 @@
   "tasks": {
     "payout": {
       "title": "Payout Tasks",
-      "subtitle": "Complete payout tasks and earn rewards",
       "description": "Complete daily minimum tasks to access payin tasks",
       "totalTasks": "Total Tasks",
       "taskRange": "Amount Range",

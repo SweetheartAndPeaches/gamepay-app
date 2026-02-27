@@ -22,14 +22,7 @@
     "success": "Éxito",
     "error": "Error",
     "warning": "Advertencia",
-    "info": "Información",
-    "menu": "Menú",
-    "notification": "Notificación",
-    "support": "Soporte",
-    "profile": "Mi perfil",
-    "taskHall": "Sala de tareas",
-    "claimed": "Reclamado",
-    "completed": "Completado"
+    "info": "Información"
   },
   "share": {
     "title": "Compartir",
@@ -81,7 +74,6 @@
   "tasks": {
     "payout": {
       "title": "Tareas de pago",
-      "subtitle": "Complete tareas de pago y gane recompensas",
       "description": "Complete las tareas mínimas diarias para acceder a tareas de cobro",
       "totalTasks": "Total de tareas",
       "taskRange": "Rango de monto",

@@ -22,14 +22,7 @@
     "success": "Succès",
     "error": "Erreur",
     "warning": "Avertissement",
-    "info": "Information",
-    "menu": "Menu",
-    "notification": "Notification",
-    "support": "Support",
-    "profile": "Mon profil",
-    "taskHall": "Salle des tâches",
-    "claimed": "Réclamé",
-    "completed": "Terminé"
+    "info": "Information"
   },
   "share": {
     "title": "Partager",
@@ -81,7 +74,6 @@
   "tasks": {
     "payout": {
       "title": "Tâches de paiement",
-      "subtitle": "Complétez les tâches de paiement et gagnez des récompenses",
       "description": "Complétez les tâches minimales quotidiennes pour accéder aux tâches d'encaissement",
       "totalTasks": "Total des tâches",
       "taskRange": "Plage de montant",

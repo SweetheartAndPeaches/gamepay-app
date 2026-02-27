@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/MainLayout';
-import PageHeader from '@/components/PageHeader';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import {
 import { useI18n } from '@/i18n/context';
 import { useAuth } from '@/contexts/AuthContext';
 import { authFetch } from '@/lib/auth';
-import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter, MessageSquare, User } from 'lucide-react';
+import { Wallet, Clock, AlertCircle, ArrowDownCircle, ArrowUpCircle, Shield, Filter } from 'lucide-react';
 import TaskDetailDialog from '@/components/TaskDetailDialog';
 import { toast } from 'sonner';
 
@@ -471,43 +471,7 @@ export default function PayoutTasksPage() {
   return (
     <MainLayout showBalance={false}>
       <div className="p-4 space-y-4">
-        <PageHeader
-          showTitle={false}
-          showRefresh={true}
-          onRefresh={() => {
-            if (activeTab === 'hall') {
-              fetchAvailableTasks();
-            } else {
-              fetchClaimedTasks();
-            }
-          }}
-          showNotification={true}
-          notificationCount={5}
-          onNotification={() => {/* TODO: 打开消息通知 */}}
-          showSupport={true}
-          onSupport={() => {/* TODO: 打开人工客服 */}}
-          showAvatar={true}
-          userName={user?.phone || 'User'}
-          onAvatarClick={() => router.push('/profile')}
-          showMobileMenu={true}
-          onMobileMenu={() => {/* TODO: 打开移动端侧边栏 */}}
-          navItems={[
-            {
-              label: t('tasks.payout.hall'),
-              value: 'hall',
-              icon: <MessageSquare className="h-4 w-4" />,
-            },
-            {
-              label: t('tasks.payout.claimedTasks'),
-              value: 'claimed',
-              icon: <Clock className="h-4 w-4" />,
-            },
-          ]}
-          activeNav={activeTab}
-          onNavChange={(value) => {
-            setActiveTab(value as 'hall' | 'claimed');
-          }}
-        />
+        <h1 className="text-xl font-bold text-gray-900">{t('tasks.payout.title')}</h1>
 
         {/* 提示卡片 */}
         {!canClaim && activeTask && (
@@ -555,10 +519,15 @@ export default function PayoutTasksPage() {
           </div>
         </Card>
 
-        {/* 任务内容 */}
-        {/* 任务大厅 */}
-        {activeTab === 'hall' && (
-          <div className="space-y-3 mt-4">
+        {/* 任务 Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="hall">{t('tasks.payout.hall')}</TabsTrigger>
+            <TabsTrigger value="claimed">{t('tasks.payout.claimedTasks')}</TabsTrigger>
+          </TabsList>
+
+          {/* 任务大厅 */}
+          <TabsContent value="hall" className="space-y-3 mt-4">
             {/* 金额范围选择器 */}
             <div className="flex items-center gap-2 mb-4">
               <Filter className="w-4 h-4 text-gray-600" />
@@ -667,12 +636,10 @@ export default function PayoutTasksPage() {
                 )}
               </>
             )}
-          </div>
-        )}
+          </TabsContent>
 
-        {/* 已领取任务 */}
-        {activeTab === 'claimed' && (
-          <div className="space-y-3 mt-4">
+          {/* 已领取任务 */}
+          <TabsContent value="claimed" className="space-y-3 mt-4">
             {loading ? (
               <div className="text-center py-8 text-gray-500">
                 {t('common.loading')}
@@ -731,8 +698,8 @@ export default function PayoutTasksPage() {
                 </Card>
               ))
             )}
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
 
         {/* 任务详情对话框 */}
         {selectedOrder && (

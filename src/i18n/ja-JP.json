@@ -22,14 +22,7 @@
     "success": "成功",
     "error": "エラー",
     "warning": "警告",
-    "info": "情報",
-    "menu": "メニュー",
-    "notification": "通知",
-    "support": "サポート",
-    "profile": "プロフィール",
-    "taskHall": "タスクホール",
-    "claimed": "受け取り済み",
-    "completed": "完了"
+    "info": "情報"
   },
   "share": {
     "title": "シェア",
@@ -81,7 +74,6 @@
   "tasks": {
     "payout": {
       "title": "支払いタスク",
-      "subtitle": "支払いタスクを完了して報酬を獲得",
       "description": "毎日の最低タスクを完了して入金タスクにアクセスしてください",
       "totalTasks": "総タスク数",
       "taskRange": "金額範囲",

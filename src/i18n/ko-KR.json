@@ -22,14 +22,7 @@
     "success": "성공",
     "error": "오류",
     "warning": "경고",
-    "info": "정보",
-    "menu": "메뉴",
-    "notification": "알림",
-    "support": "고객지원",
-    "profile": "내 정보",
-    "taskHall": "작업 홀",
-    "claimed": "수령됨",
-    "completed": "완료"
+    "info": "정보"
   },
   "share": {
     "title": "공유",
@@ -81,7 +74,6 @@
   "tasks": {
     "payout": {
       "title": "지급 작업",
-      "subtitle": "지급 작업을 완료하고 보상을 받으세요",
       "description": "일일 최소 작업을 완료하면 수금 작업에 액세스할 수 있습니다",
       "totalTasks": "총 작업 수",
       "taskRange": "금액 범위",
