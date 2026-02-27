@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient(token);
+    const client = getSupabaseClient();
 
     // 检查任务是否属于当前用户
     const { data: task, error: taskError } = await client

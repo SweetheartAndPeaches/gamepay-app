@@ -28,21 +28,8 @@ function getSupabaseCredentials(): SupabaseCredentials {
 export function getSupabaseClient(token?: string): SupabaseClient {
   const { url, serviceKey } = getSupabaseCredentials();
 
-  if (token) {
-    return createClient(url, serviceKey, {
-      global: {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-      db: {
-        timeout: 60000,
-      },
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-  }
-
+  // 使用 service_role_key 时，不需要传递用户的 JWT
+  // service_role_key 本身就有完全权限，可以绕过 RLS
   return createClient(url, serviceKey, {
     db: {
       timeout: 60000,

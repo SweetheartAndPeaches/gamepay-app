@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = getSupabaseClient(token);
+    const client = getSupabaseClient();
 
     // 检查代收任务是否开启
     const { data: setting, error: settingError } = await client
